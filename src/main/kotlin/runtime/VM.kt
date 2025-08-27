@@ -8,7 +8,7 @@ import parse.Program
  */
 class VM(
     private val program: Program,
-    private val out: (String) -> Unit = { println(it) }
+    private val out: (String) -> Unit = { print(it) }
 ) {
     private val slots = LongArray(37) //Index 0 is unused
 
@@ -57,6 +57,8 @@ class VM(
         } else {
             val ascii = v.toInt()
             val rendered = when (ascii) {
+                0 -> " "
+                10, 13 -> "\n"
                 in 32..126 -> ascii.toChar().toString()
                 in 0..255 -> "\\x%02X".format(ascii)
                 else -> "\\u%04X".format(ascii)
