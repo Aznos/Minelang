@@ -5,7 +5,7 @@ package runtime
  */
 object ItemRegistry {
     private val byName: Map<String, Int> = mapOf(
-        "cobblestone" to 4
+        "cobblestone" to 102
     )
 
     /**

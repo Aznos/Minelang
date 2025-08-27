@@ -1,6 +1,9 @@
 import io.Source
 import io.SourceLoader
 import lexer.Lexer
+import parse.ParseException
+import parse.Parser
+import runtime.VM
 
 /**
  * Main entry point
@@ -17,8 +20,15 @@ fun main(args: Array<String>) {
     println("Line count: ${source.lineCount}")
     println("---------- Program Start ----------")
 
-    val tokens = Lexer(source).lexAll()
-    for(token in tokens) {
-        println(token)
+    try {
+        val tokens = Lexer(source).lexAll()
+        val program = Parser(tokens).parseProgram()
+        VM(program).run()
+    } catch(e: ParseException) {
+        System.err.println("Parse error in ${source.origin}: ${e.message}")
+        kotlin.system.exitProcess(1)
+    } catch(e: Exception) {
+        System.err.println("Error: ${e.message}")
+        kotlin.system.exitProcess(2)
     }
 }

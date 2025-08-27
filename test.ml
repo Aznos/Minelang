@@ -1,1 +1,1 @@
-say cobblestone to string
+say cobblestone
