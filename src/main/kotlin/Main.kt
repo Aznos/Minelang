@@ -1,5 +1,6 @@
 import io.Source
 import io.SourceLoader
+import lexer.Lexer
 
 /**
  * Main entry point
@@ -16,8 +17,8 @@ fun main(args: Array<String>) {
     println("Line count: ${source.lineCount}")
     println("---------- Program Start ----------")
 
-    source.lines().forEachIndexed { idx, line ->
-        val n = idx + 1 // Line numbers start at 1 for user display
-        println(String.format("%4d | %s", n, line))
+    val tokens = Lexer(source).lexAll()
+    for(token in tokens) {
+        println(token)
     }
 }

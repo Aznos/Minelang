@@ -1,3 +1,1 @@
-hello this
-is a
-test
+say cobblestone to string
