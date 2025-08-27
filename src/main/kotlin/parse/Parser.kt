@@ -75,6 +75,9 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.Keyword.SAY -> parseSay()
             Token.Kind.Keyword.PLACE -> parsePlace()
             Token.Kind.Keyword.CRAFT -> parseCraft()
+            Token.Kind.Keyword.SHEAR -> parseShear()
+            Token.Kind.Keyword.SMITH -> parseSmith()
+            Token.Kind.Keyword.DISENCHANT -> parseDisenchant()
             is Token.Kind.EOL -> { advance(); parseStmt() }
             is Token.Kind.EOF -> errorAt(t, "Unexpected EOF")
             else -> errorAt(t, "Unexpected token: ${t.kind}")
@@ -121,6 +124,54 @@ class Parser(private val tokens: List<Token>) {
         val c = expectInt()
 
         return Instr.CraftAdd(a, b, c)
+    }
+
+    private fun parseShear(): Instr {
+        expectKeyword(Token.Kind.Keyword.SHEAR)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val a = expectInt()
+
+        expectKeyword(Token.Kind.Keyword.FROM)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val b = expectInt()
+
+        expectKeyword(Token.Kind.Keyword.INTO)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val c = expectInt()
+
+        return Instr.ShearSub(a, b, c)
+    }
+
+    private fun parseSmith(): Instr {
+        expectKeyword(Token.Kind.Keyword.SMITH)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val a = expectInt()
+
+        expectKeyword(Token.Kind.Keyword.WITH)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val b = expectInt()
+
+        expectKeyword(Token.Kind.Keyword.INTO)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val c = expectInt()
+
+        return Instr.SmithMul(a, b, c)
+    }
+
+    private fun parseDisenchant(): Instr {
+        expectKeyword(Token.Kind.Keyword.DISENCHANT)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val a = expectInt()
+
+        expectKeyword(Token.Kind.Keyword.BY)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val b = expectInt()
+
+        expectKeyword(Token.Kind.Keyword.INTO)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val c = expectInt()
+
+        return Instr.DisenchantDiv(a, b, c)
     }
 
     private fun parseOptionalToString(): Boolean {

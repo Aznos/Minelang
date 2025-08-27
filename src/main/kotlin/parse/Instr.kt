@@ -38,6 +38,36 @@ sealed interface Instr {
      * @property c The destination slot number (1..36)
      */
     data class CraftAdd(val a: Int, val b: Int, val c: Int) : Instr
+
+    /**
+     * `shear slot <a> from slot <b> into slot <c>`
+     * slot[c] = slot[b] - slot[a]
+     *
+     * @property a The slot number to subtract (1..36)
+     * @property b The slot number to subtract from (1..36)
+     * @property c The destination slot number (1..36)
+     */
+    data class ShearSub(val a: Int, val b: Int, val c: Int) : Instr
+
+    /**
+     * `smith slot <a> with slot <b> into slot <c>`
+     * slot[c] = slot[a] * slot[b]
+     *
+     * @property a The first slot number (1..36)
+     * @property b The second slot number (1..36)
+     * @property c The destination slot number (1..36)
+     */
+    data class SmithMul(val a: Int, val b: Int, val c: Int) : Instr
+
+    /**
+     * `disenchant slot <a> by slot <b> into slot <c>`
+     * slot[c] = slot[a] / slot[b]
+     *
+     * @property a The slot number to divide (1..36)
+     * @property b The slot number to divide by (1..36)
+     * @property c The destination slot number (1..36)
+     */
+    data class DisenchantDiv(val a: Int, val b: Int, val c: Int) : Instr
 }
 
 /**

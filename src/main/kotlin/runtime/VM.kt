@@ -22,6 +22,9 @@ class VM(
                 is Instr.SayItem -> execSayItem(ins)
                 is Instr.SaySlot -> execSaySlot(ins)
                 is Instr.CraftAdd -> execCraftAdd(ins)
+                is Instr.ShearSub -> execShearSub(ins)
+                is Instr.SmithMul -> execSmithMul(ins)
+                is Instr.DisenchantDiv -> execDisenchantDiv(ins)
             }
         }
     }
@@ -49,6 +52,24 @@ class VM(
     private fun execCraftAdd(c: Instr.CraftAdd) {
         checkSlot(c.a); checkSlot(c.b); checkSlot(c.c)
         slots[c.c] = slots[c.a] + slots[c.b]
+    }
+
+    private fun execShearSub(c: Instr.ShearSub) {
+        checkSlot(c.a); checkSlot(c.b); checkSlot(c.c)
+        slots[c.c] = slots[c.b] - slots[c.a]
+    }
+
+    private fun execSmithMul(c: Instr.SmithMul) {
+        checkSlot(c.a); checkSlot(c.b); checkSlot(c.c)
+        slots[c.c] = slots[c.a] * slots[c.b]
+    }
+
+    private fun execDisenchantDiv(c: Instr.DisenchantDiv) {
+        checkSlot(c.a); checkSlot(c.b); checkSlot(c.c)
+        val denom = slots[c.b]
+        require(denom != 0L) { "Division by zero in slot ${c.b}" }
+
+        slots[c.c] = slots[c.a] / denom
     }
 
     private fun sayValue(v: Long, asChar: Boolean) {

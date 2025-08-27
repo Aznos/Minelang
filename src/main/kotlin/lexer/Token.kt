@@ -14,7 +14,12 @@ data class Token(
 ) {
     sealed interface Kind {
         enum class Keyword : Kind {
-            SAY, TO, STRING, PLACE, IN, SLOT, CRAFT, WITH, INTO
+            SAY, TO, STRING,
+            PLACE, IN, SLOT,
+            CRAFT, WITH, INTO,
+            SHEAR, FROM,
+            DISENCHANT, BY,
+            SMITH
         }
 
         data class Ident(val text: String): Kind //Identifiers
