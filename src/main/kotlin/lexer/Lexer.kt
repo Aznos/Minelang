@@ -10,6 +10,12 @@ class Lexer(private val source: Source) {
         "say" to Token.Kind.Keyword.SAY,
         "to" to Token.Kind.Keyword.TO,
         "string" to Token.Kind.Keyword.STRING,
+        "place" to Token.Kind.Keyword.PLACE,
+        "in" to Token.Kind.Keyword.IN,
+        "slot" to Token.Kind.Keyword.SLOT,
+        "craft" to Token.Kind.Keyword.CRAFT,
+        "with" to Token.Kind.Keyword.WITH,
+        "into" to Token.Kind.Keyword.INTO,
     )
 
     /**
@@ -32,8 +38,15 @@ class Lexer(private val source: Source) {
                 }
 
                 val lower = part.lowercase()
-                val kind = keywords[lower] ?: Token.Kind.Ident(part)
-                out += Token(kind, lineNo, col)
+                val tok = when {
+                    lower in keywords ->
+                        Token(keywords.getValue(lower), lineNo, col)
+                    part.toLongOrNull() != null ->
+                        Token(Token.Kind.IntLit(part.toLong()), lineNo, col)
+                    else -> Token(Token.Kind.Ident(part), lineNo, col)
+                }
+
+                out += tok
                 col += part.length + 1
             }
 
