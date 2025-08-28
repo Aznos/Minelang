@@ -135,7 +135,7 @@ class Parser(private val tokens: List<Token>) {
         expectKeyword(Token.Kind.Keyword.SLOT)
         val b = expectInt()
 
-        expectKeyword(Token.Kind.Keyword.INTO)
+        expectKeyword(Token.Kind.Keyword.IN)
         expectKeyword(Token.Kind.Keyword.SLOT)
         val c = expectInt()
 
@@ -151,7 +151,7 @@ class Parser(private val tokens: List<Token>) {
         expectKeyword(Token.Kind.Keyword.SLOT)
         val b = expectInt()
 
-        expectKeyword(Token.Kind.Keyword.INTO)
+        expectKeyword(Token.Kind.Keyword.IN)
         expectKeyword(Token.Kind.Keyword.SLOT)
         val c = expectInt()
 
@@ -167,7 +167,7 @@ class Parser(private val tokens: List<Token>) {
         expectKeyword(Token.Kind.Keyword.SLOT)
         val b = expectInt()
 
-        expectKeyword(Token.Kind.Keyword.INTO)
+        expectKeyword(Token.Kind.Keyword.IN)
         expectKeyword(Token.Kind.Keyword.SLOT)
         val c = expectInt()
 
@@ -183,7 +183,7 @@ class Parser(private val tokens: List<Token>) {
         expectKeyword(Token.Kind.Keyword.SLOT)
         val b = expectInt()
 
-        expectKeyword(Token.Kind.Keyword.INTO)
+        expectKeyword(Token.Kind.Keyword.IN)
         expectKeyword(Token.Kind.Keyword.SLOT)
         val c = expectInt()
 
@@ -375,7 +375,7 @@ class Parser(private val tokens: List<Token>) {
         expectKeyword(Token.Kind.Keyword.SLOT)
         val sackSlot = expectInt()
 
-        expectKeyword(Token.Kind.Keyword.INTO)
+        expectKeyword(Token.Kind.Keyword.IN)
         expectKeyword(Token.Kind.Keyword.SLOT)
         val dst = expectInt()
 

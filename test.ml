@@ -1,4 +1,5 @@
-place sack in slot 1 contains [pumpkin_stem, iron_bars]
-trade slot 1 at 1 to diamond_ore
+place cobblestone in slot 1
+place dirt in slot 2
 
-say slot 1
+disenchant slot 1 by slot 2 in slot 3
+say slot 3

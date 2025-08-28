@@ -16,7 +16,7 @@ data class Token(
         enum class Keyword : Kind {
             SAY, TO, STRING,
             PLACE, IN, SLOT,
-            CRAFT, WITH, INTO,
+            CRAFT, WITH,
             SHEAR, FROM,
             DISENCHANT, BY,
             SMITH,
