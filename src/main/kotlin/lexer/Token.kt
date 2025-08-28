@@ -24,12 +24,19 @@ data class Token(
             REDSTONE, THEN, ELSE, END, // if / else / end
             MINE, DO, // while
             SMELT, TIMES, // repeat N times
-            TRAVEL, FROM_KW, TO_KW, // for-range
-            BEDROCK, TNT // == and !=
+            TRAVEL, // for-range
+            BEDROCK, TNT, // == and !=
+
+            SACK, CONTAINS // arrays
         }
 
         data class Ident(val text: String): Kind //Identifiers
         data class IntLit(val value: Long): Kind //Integer literals
+
+        data object LBRACK: Kind
+        data object RBRACK: Kind
+        data object COMMA: Kind
+
         data object EOL : Kind
         data object EOF : Kind
     }

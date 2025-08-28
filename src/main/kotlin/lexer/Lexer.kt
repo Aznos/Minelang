@@ -33,6 +33,8 @@ class Lexer(private val source: Source) {
         "to" to Token.Kind.Keyword.TO,
         "bedrock" to Token.Kind.Keyword.BEDROCK,
         "tnt" to Token.Kind.Keyword.TNT,
+        "sack" to Token.Kind.Keyword.SACK,
+        "contains" to Token.Kind.Keyword.CONTAINS,
     )
 
     /**
@@ -45,26 +47,40 @@ class Lexer(private val source: Source) {
         source.lines().forEachIndexed { idx, rawLine ->
             val lineNo = idx + 1
             val line = rawLine.substringBefore("//")
+            val norm = line
+                .replace("[", " [ ")
+                .replace("]", " ] ")
+                .replace(",", " , ")
+
             var col = 1
-            val parts = line.split(Regex("\\s+"))
+            val parts = norm.split(Regex("\\s+"))
+            var pos = 0
+
+            fun advanceCol(tokenText: String) {
+                val next = line.indexOf(tokenText, pos)
+                col = if(next >= 0) next + 1 else col + tokenText.length + 1
+                pos = if(next >= 0) next + tokenText.length else pos + tokenText.length
+            }
 
             for(part in parts) {
-                if(part.isBlank()) {
-                    col += part.length
-                    continue
-                }
+                if(part.isBlank()) continue
 
-                val lower = part.lowercase()
-                val tok = when {
-                    lower in keywords ->
-                        Token(keywords.getValue(lower), lineNo, col)
-                    part.toLongOrNull() != null ->
-                        Token(Token.Kind.IntLit(part.toLong()), lineNo, col)
-                    else -> Token(Token.Kind.Ident(part), lineNo, col)
+                val tok = when(part) {
+                    "[" -> Token(Token.Kind.LBRACK, lineNo, col)
+                    "]" -> Token(Token.Kind.RBRACK, lineNo, col)
+                    "," -> Token(Token.Kind.COMMA, lineNo, col)
+                    else -> {
+                        val lower = part.lowercase()
+                        when {
+                            lower in keywords -> Token(keywords.getValue(lower), lineNo, col)
+                            part.toLongOrNull() != null -> Token(Token.Kind.IntLit(part.toLong()), lineNo, col)
+                            else -> Token(Token.Kind.Ident(part), lineNo, col)
+                        }
+                    }
                 }
 
                 out += tok
-                col += part.length + 1
+                advanceCol(part)
             }
 
             out += Token(Token.Kind.EOL, lineNo, if(line.isEmpty()) 1 else line.length + 1)
