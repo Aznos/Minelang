@@ -31,6 +31,9 @@ class Execution(
 
                 is Instr.PlaceSack -> Sack.handlePlaceSack(machine, ins)
                 is Instr.Length -> Sack.handleLength(machine, ins)
+                is Instr.Trade -> Sack.handleTrade(machine, ins)
+                is Instr.Sprint -> Sack.handleSprint(machine, ins)
+                is Instr.Sneak -> Sack.handleSneak(machine, ins)
             }
         }
     }

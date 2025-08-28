@@ -17,6 +17,22 @@ class Machine(
         require(n in 1..config.slots) { "Slot $n is out of bounds (1..${config.slots})" }
     }
 
+    fun requireSack(n: Int): IntArray {
+        val v = getRaw(n)
+        val sack = v as? Value.Sack ?: error("Slot $n does not contain a sack")
+        return sack.items.copyOf()
+    }
+
+    fun evalIndex(idxOp: parse.Operand): Int {
+        val v = when(idxOp) {
+            is parse.Operand.Number -> idxOp.value
+            is parse.Operand.Slot -> getNum(idxOp.n)
+            else -> error("Invalid index operand: $idxOp")
+        }
+
+        return v.toInt()
+    }
+
     fun setNum(n: Int, v: Long) {
         checkSlot(n)
         slots[n] = Value.Num(v)

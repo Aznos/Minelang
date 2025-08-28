@@ -89,6 +89,9 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.Keyword.SMELT -> parseSmelt()
             Token.Kind.Keyword.TRAVEL -> parseTravel()
             Token.Kind.Keyword.LENGTH -> parseLength()
+            Token.Kind.Keyword.TRADE -> parseTrade()
+            Token.Kind.Keyword.SPRINT -> parseSprint()
+            Token.Kind.Keyword.SNEAK -> parseSneak()
 
             is Token.Kind.EOL -> { advance(); parseStmt() }
             is Token.Kind.EOF -> errorAt(t, "Unexpected EOF")
@@ -377,6 +380,39 @@ class Parser(private val tokens: List<Token>) {
         val dst = expectInt()
 
         return Instr.Length(sackSlot, dst)
+    }
+
+    private fun parseTrade(): Instr {
+        expectKeyword(Token.Kind.Keyword.TRADE)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val sackSlot = expectInt()
+
+        expectKeyword(Token.Kind.Keyword.AT)
+        val idx = parseIndexOperand()
+
+        expectKeyword(Token.Kind.Keyword.TO)
+        val item = expectIdent()
+
+        return Instr.Trade(sackSlot, idx, item)
+    }
+
+    private fun parseSprint(): Instr {
+        expectKeyword(Token.Kind.Keyword.SPRINT)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val sackSlot = expectInt()
+
+        expectKeyword(Token.Kind.Keyword.WITH)
+        val item = expectIdent()
+
+        return Instr.Sprint(sackSlot, item)
+    }
+
+    private fun parseSneak(): Instr {
+        expectKeyword(Token.Kind.Keyword.SNEAK)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val sackSlot = expectInt()
+
+        return Instr.Sneak(sackSlot)
     }
 
     private fun parseOptionalToString(): Boolean {

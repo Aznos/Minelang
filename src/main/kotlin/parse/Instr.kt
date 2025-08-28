@@ -127,6 +127,33 @@ sealed interface Instr {
      * @property dst The destination slot number (1..36) to store the length
      */
     data class Length(val sackSlot: Int, val dst: Int) : Instr
+
+    /**
+     * `trade slot <n> at <n> with <item>`
+     * Modify an item in the array
+     *
+     * @property sackSlot The slot number (1..36) containing the sack
+     * @property index The index to modify
+     * @property itemName The new item name to place at the specified index
+     */
+    data class Trade(val sackSlot: Int, val index: Operand, val itemName: String) : Instr
+
+    /**
+     * `sprint slot <n> with <item>`
+     * Push an item onto the sack
+     *
+     * @property sackSlot The slot number (1..36) containing the sack
+     * @property itemName The item name to push onto the sack
+     */
+    data class Sprint(val sackSlot: Int, val itemName: String) : Instr
+
+    /**
+     * `sneak slot <n>`
+     * Pop an item from the sack into the slot
+     *
+     * @property sackSlot The slot number (1..36) containing the sack
+     */
+    data class Sneak(val sackSlot: Int) : Instr
 }
 
 /**

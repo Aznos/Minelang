@@ -38,7 +38,10 @@ class Lexer(private val source: Source) {
         "contains" to Token.Kind.Keyword.CONTAINS,
         "harvest" to Token.Kind.Keyword.HARVEST,
         "at" to Token.Kind.Keyword.AT,
-        "length" to Token.Kind.Keyword.LENGTH
+        "length" to Token.Kind.Keyword.LENGTH,
+        "trade" to Token.Kind.Keyword.TRADE,
+        "sprint" to Token.Kind.Keyword.SPRINT,
+        "sneak" to Token.Kind.Keyword.SNEAK
     )
 
     /**
