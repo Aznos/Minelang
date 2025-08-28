@@ -15,7 +15,7 @@ fun main(args: Array<String>) {
         SourceLoader.fromFile(args[0])
     } else {
         println("Reading program from stdin. Press Ctrl+D (Unix) or Ctrl+Z (Windows) to end input.")
-        SourceLoader.fromStdin()
+        SourceLoader.fromStdinUntilDelimiter()
     }
 
     println("Loaded: ${source.origin}")

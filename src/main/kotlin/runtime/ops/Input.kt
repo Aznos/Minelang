@@ -38,7 +38,9 @@ object Input {
         }
 
         m.emit(prompt)
-        val line = readlnOrNull() ?: ""
+        m.flush()
+
+        val line = m.readLineOrNull() ?: error("End of input reached")
         val replyIds = line.map { ch ->
             ItemRegistry.idOfChar(ch) ?: error("No item for character: '$ch'")
         }.toIntArray()

@@ -39,6 +39,10 @@ tasks.jacocoTestReport {
     reports { xml.required.set(true); html.required.set(true) }
 }
 
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
+}
+
 kotlin {
     jvmToolchain(21)
 }

@@ -69,5 +69,6 @@ class Machine(
         }
     }
 
-    fun emitAscii(v: Long) = config.out(Effects.renderAscii(v, config))
+    fun readLineOrNull(): String? = config.inReader.readLine()
+    fun flush() { System.out.flush() }
 }

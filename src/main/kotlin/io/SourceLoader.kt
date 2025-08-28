@@ -1,5 +1,7 @@
 package io
 
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -45,6 +47,19 @@ object SourceLoader {
      */
     fun fromStdin(originLabel: String = "stdin"): Source {
         val raw = generateSequence(::readlnOrNull).joinToString("\n")
+        return Source.fromRaw(originLabel, raw)
+    }
+
+    fun fromStdinUntilDelimiter(originLabel: String = "stdin", delimiter: String = "%%"): Source {
+        val br = BufferedReader(InputStreamReader(System.`in`))
+        val lines = mutableListOf<String>()
+        while(true) {
+            val line = br.readLine() ?: break
+            if(line == delimiter) break
+            lines += line
+        }
+
+        val raw = lines.joinToString("\n")
         return Source.fromRaw(originLabel, raw)
     }
 }
