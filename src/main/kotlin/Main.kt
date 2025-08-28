@@ -3,7 +3,9 @@ import io.SourceLoader
 import lexer.Lexer
 import parse.ParseException
 import parse.Parser
-import runtime.VM
+import runtime.core.Execution
+import runtime.core.Machine
+import runtime.core.RuntimeConfig
 
 /**
  * Main entry point
@@ -23,7 +25,8 @@ fun main(args: Array<String>) {
     try {
         val tokens = Lexer(source).lexAll()
         val program = Parser(tokens).parseProgram()
-        VM(program).run()
+        val machine = Machine(RuntimeConfig())
+        Execution(program, machine).run()
     } catch(e: ParseException) {
         System.err.println("Parse error in ${source.origin}: ${e.message}")
         kotlin.system.exitProcess(1)

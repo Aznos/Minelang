@@ -1,4 +1,4 @@
-package runtime
+package runtime.registry
 
 /**
  * Maps items to their numeric IDs
