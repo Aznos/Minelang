@@ -11,7 +11,7 @@ class ControlFlowTest {
                 length slot 1 in slot 2
                 place stone in slot 4
                 travel slot 3 from slot 4 to slot 2 do
-                    say harvest slot 1 at slot 3 to string
+                    say brew harvest slot 1 at slot 3 as string
                 end
             """.trimIndent(),
             "hello"

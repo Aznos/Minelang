@@ -2,7 +2,9 @@ package parse
 
 import lexer.Token
 import parse.Operand.*
+import java.security.Key
 import kotlin.math.exp
+import kotlin.math.round
 
 /**
  * Consumes tokens and produces a [Program]
@@ -13,15 +15,6 @@ class Parser(private val tokens: List<Token>) {
     private fun peek(): Token = tokens[i]
     private fun atEof(): Boolean = peek().kind is Token.Kind.EOF
     private fun advance(): Token = tokens[i++]
-
-    private fun match(kind: Token.Kind): Boolean {
-        if(peek().kind == kind) {
-            i++
-            return true
-        }
-
-        return false
-    }
 
     private fun consumeEols() {
         while(peek().kind is Token.Kind.EOL) {
@@ -92,6 +85,7 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.Keyword.TRADE -> parseTrade()
             Token.Kind.Keyword.SPRINT -> parseSprint()
             Token.Kind.Keyword.SNEAK -> parseSneak()
+            Token.Kind.Keyword.BREW -> parseBrewInto()
 
             is Token.Kind.EOL -> { advance(); parseStmt() }
             is Token.Kind.EOF -> errorAt(t, "Unexpected EOF")
@@ -101,18 +95,8 @@ class Parser(private val tokens: List<Token>) {
 
     private fun parseSay(): Instr {
         expectKeyword(Token.Kind.Keyword.SAY)
-
-        val opStart = peek()
-        val operand = when(opStart.kind) {
-            Token.Kind.Keyword.SLOT,
-            Token.Kind.Keyword.HARVEST,
-            is Token.Kind.IntLit,
-            is Token.Kind.Ident -> parseOperand()
-            else -> errorAt(opStart, "Expected operand after 'say'")
-        }
-
-        val toStr = parseOptionalToString()
-        return Instr.SayExpr(operand, toStr)
+        val operand = parseOperand()
+        return Instr.SayExpr(operand)
     }
 
     private fun parsePlace(): Instr {
@@ -196,7 +180,7 @@ class Parser(private val tokens: List<Token>) {
                 when(k) {
                     Token.Kind.Keyword.SLOT -> {
                         advance()
-                        Operand.Slot(expectInt())
+                        Slot(expectInt())
                     }
 
                     Token.Kind.Keyword.HARVEST -> {
@@ -209,6 +193,7 @@ class Parser(private val tokens: List<Token>) {
                         Harvest(sackSlot, idx)
                     }
 
+                    Token.Kind.Keyword.BREW -> parseBrewOperand()
                     else -> errorAt(peek(), "Expected operand, got keyword '${k.name.lowercase()}'")
                 }
             }
@@ -227,6 +212,92 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.EOL -> errorAt(peek(), "Expected operand, got EOL")
 
             else -> errorAt(peek(), "Expected operand, got $k")
+        }
+    }
+
+    private data class BrewOpts(
+        var scale: Int? = null,
+        var rounding: Rounding? = null,
+        var sawCauldron: Boolean = false,
+        var sawGrindstone: Boolean = false
+    )
+
+    private fun parseBrewOptions(opts: BrewOpts) {
+        while((peek().kind as? Token.Kind.Keyword) == Token.Kind.Keyword.WITH) {
+            advance()
+            when(peek().kind as? Token.Kind.Keyword) {
+                Token.Kind.Keyword.CAULDRON -> {
+                    if(opts.sawCauldron) errorAt(peek(), "Duplicate 'with cauldron' clause")
+                    advance()
+                    expectKeyword(Token.Kind.Keyword.SCALE)
+                    opts.scale = expectInt()
+                    opts.sawCauldron = true
+                }
+
+                Token.Kind.Keyword.GRINDSTONE -> {
+                    if(opts.sawGrindstone) errorAt(peek(), "Duplicate 'with grindstone' clause")
+                    advance()
+                    opts.rounding = parseRounding()
+                    opts.sawGrindstone = true
+                }
+
+                else -> errorAt(peek(), "Expected 'cauldron' or 'grindstone' after 'with'")
+            }
+        }
+    }
+
+    private fun parseBrewOperand(): Brew {
+        expectKeyword(Token.Kind.Keyword.BREW)
+        val value = parseOperand()
+        expectKeyword(Token.Kind.Keyword.AS)
+
+        val target = parseBrewType()
+        val opts = BrewOpts()
+        parseBrewOptions(opts)
+        return Brew(value, target, opts.rounding, opts.scale)
+    }
+
+    private fun parseBrewInto(): Instr.BrewInto {
+        expectKeyword(Token.Kind.Keyword.BREW)
+        val value = parseOperand()
+        expectKeyword(Token.Kind.Keyword.AS)
+
+        val target = parseBrewType()
+        val opts = BrewOpts()
+
+        parseBrewOptions(opts)
+
+        val k = (peek().kind as? Token.Kind.Keyword)
+        if(k != Token.Kind.Keyword.IN) errorAt(peek(), "Expected 'in' after brew target type")
+        advance()
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val dst = expectInt()
+
+        parseBrewOptions(opts)
+        return Instr.BrewInto(value, target, dst, opts.rounding, opts.scale)
+    }
+
+    private fun parseBrewType(): BrewType {
+        val t = advance()
+        val kw = t.kind as? Token.Kind.Keyword ?: errorAt(t, "Expected brew type, got ${t.kind}")
+        return when(kw) {
+            Token.Kind.Keyword.INT_T -> BrewType.INT
+            Token.Kind.Keyword.RAT_T -> BrewType.RAT
+            Token.Kind.Keyword.FLOAT_T -> BrewType.FLOAT
+            Token.Kind.Keyword.STRING_T -> BrewType.STRING
+            else -> errorAt(t, "Expected brew type, got keyword '${kw.name.lowercase()}'")
+        }
+    }
+
+    private fun parseRounding(): Rounding {
+        val t = advance()
+        val kw = t.kind as? Token.Kind.Keyword ?: errorAt(t, "Expected rounding mode, got ${t.kind}")
+        return when(kw) {
+            Token.Kind.Keyword.FLOOR -> Rounding.FLOOR
+            Token.Kind.Keyword.CEIL -> Rounding.CEIL
+            Token.Kind.Keyword.ROUND -> Rounding.ROUND
+            Token.Kind.Keyword.TRUNC -> Rounding.TRUNC
+            else -> errorAt(t, "Expected rounding mode, got keyword '${kw.name.lowercase()}'")
         }
     }
 
@@ -413,14 +484,6 @@ class Parser(private val tokens: List<Token>) {
         val sackSlot = expectInt()
 
         return Instr.Sneak(sackSlot)
-    }
-
-    private fun parseOptionalToString(): Boolean {
-        return if((peek().kind as? Token.Kind.Keyword) == Token.Kind.Keyword.TO) {
-            advance()
-            expectKeyword(Token.Kind.Keyword.STRING)
-            true
-        } else false
     }
 }
 

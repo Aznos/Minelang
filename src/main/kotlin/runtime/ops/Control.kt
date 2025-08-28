@@ -6,23 +6,44 @@ import parse.Instr
 import parse.Operand
 import runtime.core.Machine
 import runtime.core.Value
+import runtime.ops.Eval.evalOperand
 import runtime.registry.ItemRegistry
+import kotlin.math.abs
 
 object Control {
-    private fun evalOperand(m: Machine, op: Operand): Long = when(op) {
-        is Operand.Slot -> m.getNum(op.n)
-        is Operand.Item -> ItemRegistry.idOf(op.name)?.toLong() ?: error("Unknown item: ${op.name}")
-        is Operand.Number -> op.value.toLong()
-        is Operand.Harvest -> {
-            val sackVal = m.getRaw(op.sackSlot)
-            val sack = sackVal as? Value.Sack ?: error("Slot ${op.sackSlot} does not contain a sack")
-            val idx = evalIndex(m, op.index)
-            require(idx in 1..sack.items.size) {
-                "Index $idx out of bounds for sack in slot ${op.sackSlot} (size ${sack.items.size})"
-            }
+    private fun evalValue(m: Machine, op: Operand): Value =
+        Eval.evalOperand(m, op)
 
-            sack.items[idx - 1].toLong()
+    private fun valuesEqual(a: Value, b: Value): Boolean {
+        return when {
+            a is Value.Sack || b is Value.Sack ->
+                error("Cannot compare sacks directly; brew or harvest into a comparable value")
+
+            a is Value.CharCode && b is Value.CharCode -> a.code == b.code
+            a is Value.Rat && b is Value.Rat -> a.num * b.den == b.num * a.den
+            a is Value.Rat && b is Value.Num -> a.num == b.v * a.den
+            a is Value.Num && b is Value.Rat -> b.num == a.v * b.den
+            a is Value.Num && b is Value.Num -> a.v == b.v
+
+            else -> {
+                val da = toDouble(a)
+                val db = toDouble(b)
+                equalWithEpsilon(da, db)
+            }
         }
+    }
+
+    private fun toDouble(v: Value): Double = when (v) {
+        is Value.Num -> v.v.toDouble()
+        is Value.Rat -> if(v.den == 0L) Double.NaN else v.num.toDouble() / v.den.toDouble()
+        is Value.FloatStr -> v.text.toDoubleOrNull() ?: Double.NaN
+        is Value.CharCode -> v.code.toDouble()
+        is Value.Sack -> Double.NaN
+    }
+
+    private fun equalWithEpsilon(a: Double, b: Double, eps: Double = 1e-9): Boolean {
+        if(a.isNaN() || b.isNaN()) return false
+        return abs(a - b) <= eps
     }
 
     private fun test(m: Machine, cond: Condition): Boolean {
@@ -66,15 +87,5 @@ object Control {
                 m.setNum(i.indexSlot, m.getNum(i.indexSlot) - 1)
             }
         }
-    }
-
-    private fun evalIndex(m: Machine, idxOp: Operand): Int {
-        val v = when(idxOp) {
-            is Operand.Number -> idxOp.value
-            is Operand.Slot -> m.getNum(idxOp.n)
-            else -> error("Index operand must be a number or slot")
-        }
-
-        return v.toInt()
     }
 }

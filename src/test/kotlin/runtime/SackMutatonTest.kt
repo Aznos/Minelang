@@ -10,7 +10,11 @@ class SackMutatonTest {
                 place sack in slot 1 contains [pumpkin_stem, iron_bars]
                 trade slot 1 at 1 to diamond_ore
                 say slot 1
-                say slot 1 to string
+                length slot 1 in slot 9
+                place stone in slot 10
+                travel slot 11 from slot 10 to slot 9 do
+                    say brew harvest slot 1 at slot 11 as string
+                end
             """.trimIndent(),
             "56,1018e"
         )
@@ -55,7 +59,11 @@ class SackMutatonTest {
             """
                 place sack in slot 1 contains [pumpkin_stem, pumpkin_stem]
                 trade slot 1 at 2 to iron_bars
-                say slot 1 to string
+                length slot 1 in slot 9
+                place stone in slot 10
+                travel slot 11 from slot 10 to slot 9 do
+                    say brew harvest slot 1 at slot 11 as string
+                end
             """.trimIndent(),
             "he"
         )

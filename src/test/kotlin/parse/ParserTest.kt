@@ -13,7 +13,7 @@ class ParserTest {
     }
 
     @Test fun parseSayHarvest() {
-        parseOk("say harvest  slot 1 at 2 to string")
+        parseOk("say brew harvest slot 1 at 2 as string")
     }
 
     @Test fun redstoneRequiresThen() {

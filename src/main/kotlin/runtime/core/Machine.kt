@@ -1,10 +1,5 @@
 package runtime.core
 
-sealed interface Value {
-    data class Num(val v: Long) : Value
-    data class Sack(val items: IntArray) : Value
-}
-
 /**
  * Holds machine state and exposes helpers for ops to use
  */
@@ -33,6 +28,11 @@ class Machine(
         return v.toInt()
     }
 
+    fun setValue(n: Int, v: Value) {
+        checkSlot(n)
+        slots[n] = v
+    }
+
     fun setNum(n: Int, v: Long) {
         checkSlot(n)
         slots[n] = Value.Num(v)
@@ -51,19 +51,23 @@ class Machine(
     fun getNum(n: Int): Long {
         return when(val v = getRaw(n)) {
             is Value.Num -> v.v
+            is Value.Rat -> if(v.den != 0L && v.num % v.den == 0L) v.num / v.den else throw RuntimeException("Slot $n contains a non-integer rational number ${v.num}/${v.den}")
+            is Value.FloatStr -> throw RuntimeException("Slot $n contains a non-integer float string '${v.text}'")
+            is Value.CharCode -> v.code
             is Value.Sack -> throw RuntimeException("Slot $n contains a sack, not a number")
         }
     }
 
-    fun emitNumber(v: Long) = config.out(v.toString())
-    fun emitAscii(v: Long) = config.out(Effects.renderAscii(v, config))
-    fun emitAsciiMany(values: IntArray) {
-        for(x in values) {
-            emitAscii(x.toLong())
+    fun emit(s: String) = config.out(s)
+    fun emitValue(v: Value) {
+        when(v) {
+            is Value.Num -> emit(v.v.toString())
+            is Value.Rat -> emit("${v.num}/${v.den}")
+            is Value.FloatStr -> emit(v.text)
+            is Value.CharCode -> emit(Effects.renderAscii(v.code, config))
+            is Value.Sack -> emit(v.items.joinToString(","))
         }
     }
 
-    fun emitList(values: IntArray) {
-        config.out(values.joinToString(","))
-    }
+    fun emitAscii(v: Long) = config.out(Effects.renderAscii(v, config))
 }

@@ -8,7 +8,7 @@ class SmokeTest {
         runAndAssert(
             """
                 say pumpkin_stem
-                say pumpkin_stem to string
+                say brew pumpkin_stem as string
             """.trimIndent(),
             "104h"
         )
@@ -29,7 +29,7 @@ class SmokeTest {
                 disenchant slot 5 by slot 6 in slot 7
                 say slot 7
             """.trimIndent(),
-            "73121"
+            "731212/10"
         )
     }
 }

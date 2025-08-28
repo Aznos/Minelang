@@ -14,21 +14,27 @@ data class Token(
 ) {
     sealed interface Kind {
         enum class Keyword : Kind {
-            SAY, TO, STRING,
-            PLACE, IN, SLOT,
+            SAY,
+            PLACE, IN, TO, SLOT,
             CRAFT, WITH,
             SHEAR, FROM,
             DISENCHANT, BY,
             SMITH,
 
-            REDSTONE, THEN, ELSE, END, // if / else / end
-            MINE, DO, // while
-            SMELT, TIMES, // repeat N times
-            TRAVEL, // for-range
-            BEDROCK, TNT, // == and !=
+            REDSTONE, THEN, ELSE, END,
+            MINE, DO,
+            SMELT, TIMES,
+            TRAVEL,
+            BEDROCK, TNT,
 
-            SACK, CONTAINS, HARVEST, AT, LENGTH, // arrays
-            TRADE, SPRINT, SNEAK // modify arrays
+            SACK, CONTAINS, HARVEST, AT, LENGTH,
+            TRADE, SPRINT, SNEAK,
+
+            BREW, AS,
+            GRINDSTONE, FLOOR, CEIL, ROUND, TRUNC,
+            CAULDRON, SCALE,
+
+            INT_T, RAT_T, FLOAT_T, STRING_T,
         }
 
         data class Ident(val text: String): Kind //Identifiers
