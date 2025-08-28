@@ -9,7 +9,7 @@ import runtime.registry.ItemRegistry
 
 object Control {
     private fun evalOperand(m: Machine, op: Operand): Long = when(op) {
-        is Operand.Slot -> m.get(op.n)
+        is Operand.Slot -> m.getNum(op.n)
         is Operand.Item -> ItemRegistry.idOf(op.name)?.toLong() ?: error("Unknown item: ${op.name}")
         is Operand.Number -> op.value.toLong()
     }
@@ -32,7 +32,7 @@ object Control {
     }
 
     fun handleSmelt(exec: (List<Instr>) -> Unit, m: Machine, i: Instr.Smelt) {
-        val times = m.get(i.countSlot)
+        val times = m.getNum(i.countSlot)
         if(times <= 0) return
         repeat(times.toInt()) {
             exec(i.body)
@@ -40,19 +40,19 @@ object Control {
     }
 
     fun handleTravel(exec: (List<Instr>) -> Unit, m: Machine, i: Instr.Travel) {
-        val cur = m.get(i.startSlot)
-        val end = m.get(i.endSlot)
-        m.set(i.indexSlot, cur)
+        val cur = m.getNum(i.startSlot)
+        val end = m.getNum(i.endSlot)
+        m.setNum(i.indexSlot, cur)
 
         if(cur <= end) {
-            while(m.get(i.indexSlot) <= end) {
+            while(m.getNum(i.indexSlot) <= end) {
                 exec(i.body)
-                m.set(i.indexSlot, m.get(i.indexSlot) + 1)
+                m.setNum(i.indexSlot, m.getNum(i.indexSlot) + 1)
             }
         } else {
-            while(m.get(i.indexSlot) >= end) {
+            while(m.getNum(i.indexSlot) >= end) {
                 exec(i.body)
-                m.set(i.indexSlot, m.get(i.indexSlot) - 1)
+                m.setNum(i.indexSlot, m.getNum(i.indexSlot) - 1)
             }
         }
     }

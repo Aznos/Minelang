@@ -75,7 +75,11 @@ class Parser(private val tokens: List<Token>) {
         val t = peek()
         return when(t.kind) {
             Token.Kind.Keyword.SAY -> parseSay()
-            Token.Kind.Keyword.PLACE -> parsePlace()
+            Token.Kind.Keyword.PLACE -> {
+
+                val t1 = tokens.getOrNull(i + 1)?.kind
+                if(t1 == Token.Kind.Keyword.SACK) parsePlaceSack() else parsePlace()
+            }
             Token.Kind.Keyword.CRAFT -> parseCraft()
             Token.Kind.Keyword.SHEAR -> parseShear()
             Token.Kind.Keyword.SMITH -> parseSmith()
@@ -201,6 +205,8 @@ class Parser(private val tokens: List<Token>) {
 
             Token.Kind.EOF -> errorAt(peek(), "Expected operand, got EOF")
             Token.Kind.EOL -> errorAt(peek(), "Expected operand, got EOL")
+
+            else -> errorAt(peek(), "Expected operand, got $k")
         }
     }
 
@@ -296,6 +302,36 @@ class Parser(private val tokens: List<Token>) {
         expectKeyword(Token.Kind.Keyword.END)
 
         return Instr.Travel(iSlot, a, b, body)
+    }
+
+    private fun parsePlaceSack(): Instr {
+        expectKeyword(Token.Kind.Keyword.PLACE)
+        expectKeyword(Token.Kind.Keyword.SACK)
+        expectKeyword(Token.Kind.Keyword.IN)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val slot = expectInt()
+
+        expectKeyword(Token.Kind.Keyword.CONTAINS)
+        val lb = advance()
+        if(lb.kind !is Token.Kind.LBRACK) errorAt(lb, "Expected '[' to start sack item list")
+
+        val items = mutableListOf<String>()
+        consumeEols()
+        if(peek().kind !is Token.Kind.RBRACK) {
+            items += expectIdent()
+            consumeEols()
+            while(peek().kind is Token.Kind.COMMA) {
+                advance()
+                consumeEols()
+                items += expectIdent()
+                consumeEols()
+            }
+        }
+
+        val rb = advance()
+        if(rb.kind !is Token.Kind.RBRACK) errorAt(rb, "Expected ']' to end sack item list")
+
+        return Instr.PlaceSack(slot, items)
     }
 
     private fun parseOptionalToString(): Boolean {

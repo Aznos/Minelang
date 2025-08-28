@@ -118,6 +118,14 @@ sealed interface Instr {
      * Initializes slot i to slot a, runs body each step, increments or decrements towards b
      */
     data class Travel(val indexSlot: Int, val startSlot: Int, val endSlot: Int, val body: List<Instr>) : Instr
+
+    /**
+     * `place sack in slot <n> contains [<item1>, <item2>, ...]`
+     *
+     * @property slot The slot number (1..36) to place the sack into
+     * @property items The list of items to include in the sack
+     */
+    data class PlaceSack(val slot: Int, val items: List<String>) : Instr
 }
 
 /**

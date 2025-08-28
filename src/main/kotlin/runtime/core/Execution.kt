@@ -2,13 +2,7 @@ package runtime.core
 
 import parse.Instr
 import parse.Program
-import runtime.ops.Add
-import runtime.ops.Control
-import runtime.ops.Div
-import runtime.ops.Move
-import runtime.ops.Mul
-import runtime.ops.Say
-import runtime.ops.Sub
+import runtime.ops.*
 
 /**
  * Runs a program by dispatching each instruction to its handler
@@ -35,6 +29,8 @@ class Execution(
                 is Instr.Mine -> Control.handleMine(::runBlock, machine, ins)
                 is Instr.Smelt -> Control.handleSmelt(::runBlock, machine, ins)
                 is Instr.Travel -> Control.handleTravel(::runBlock, machine, ins)
+
+                is Instr.PlaceSack -> Sack.handlePlaceSack(machine, ins)
             }
         }
     }

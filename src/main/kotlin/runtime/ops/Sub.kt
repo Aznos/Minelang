@@ -6,7 +6,7 @@ import runtime.registry.ItemRegistry
 
 object Sub {
     fun handleShear(m: Machine, c: Instr.ShearSub) {
-        val res = m.get(c.b) - m.get(c.a)
-        m.set(c.c, res)
+        val res = m.getNum(c.b) - m.getNum(c.a)
+        m.setNum(c.c, res)
     }
 }

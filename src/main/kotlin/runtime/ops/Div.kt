@@ -6,10 +6,10 @@ import runtime.registry.ItemRegistry
 
 object Div {
     fun handleDisenchant(m: Machine, c: Instr.DisenchantDiv) {
-        val denom = m.get(c.b)
+        val denom = m.getNum(c.b)
         require(denom != 0L) { "Division by zero in slot ${c.b}" }
-        val res = m.get(c.a) / denom
+        val res = m.getNum(c.a) / denom
 
-        m.set(c.c, res)
+        m.setNum(c.c, res)
     }
 }

@@ -2,7 +2,9 @@ package runtime.ops
 
 import parse.Instr
 import runtime.core.Machine
+import runtime.core.Value
 import runtime.registry.ItemRegistry
+import kotlin.collections.toIntArray
 
 object Say {
     fun handleSayItem(m: Machine, s: Instr.SayItem) {
@@ -11,7 +13,14 @@ object Say {
     }
 
     fun handleSaySlot(m: Machine, s: Instr.SaySlot) {
-        val v = m.get(s.slot)
-        if(!s.toString) m.emitNumber(v) else m.emitAscii(v)
+        when(val v = m.getRaw(s.slot)) {
+            is Value.Num -> if(!s.toString) m.emitAscii(v.v) else m.emitAscii(v.v)
+            is Value.Sack ->
+                if(s.toString) {
+                    m.emitAsciiMany(v.items)
+                } else {
+                    m.emitList(v.items)
+                }
+        }
     }
 }

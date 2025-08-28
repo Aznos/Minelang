@@ -7,6 +7,6 @@ import runtime.registry.ItemRegistry
 object Move {
     fun handlePlace(m: Machine, p: Instr.Place) {
         val id = ItemRegistry.idOf(p.itemName) ?: error("Unknown item: ${p.itemName}")
-        m.set(p.slot, id.toLong())
+        m.setNum(p.slot, id.toLong())
     }
 }
