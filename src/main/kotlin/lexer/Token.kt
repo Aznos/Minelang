@@ -19,7 +19,13 @@ data class Token(
             CRAFT, WITH, INTO,
             SHEAR, FROM,
             DISENCHANT, BY,
-            SMITH
+            SMITH,
+
+            REDSTONE, THEN, ELSE, END, // if / else / end
+            MINE, DO, // while
+            SMELT, TIMES, // repeat N times
+            TRAVEL, FROM_KW, TO_KW, // for-range
+            BEDROCK, TNT // == and !=
         }
 
         data class Ident(val text: String): Kind //Identifiers

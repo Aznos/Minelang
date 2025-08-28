@@ -20,7 +20,19 @@ class Lexer(private val source: Source) {
         "from" to Token.Kind.Keyword.FROM,
         "disenchant" to Token.Kind.Keyword.DISENCHANT,
         "by" to Token.Kind.Keyword.BY,
-        "smith" to Token.Kind.Keyword.SMITH,
+        "redstone" to Token.Kind.Keyword.REDSTONE,
+        "then" to Token.Kind.Keyword.THEN,
+        "else" to Token.Kind.Keyword.ELSE,
+        "end" to Token.Kind.Keyword.END,
+        "mine" to Token.Kind.Keyword.MINE,
+        "do" to Token.Kind.Keyword.DO,
+        "smelt" to Token.Kind.Keyword.SMELT,
+        "times" to Token.Kind.Keyword.TIMES,
+        "travel" to Token.Kind.Keyword.TRAVEL,
+        "from" to Token.Kind.Keyword.FROM,
+        "to" to Token.Kind.Keyword.TO,
+        "bedrock" to Token.Kind.Keyword.BEDROCK,
+        "tnt" to Token.Kind.Keyword.TNT,
     )
 
     /**
