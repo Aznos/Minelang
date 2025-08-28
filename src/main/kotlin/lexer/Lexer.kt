@@ -18,6 +18,7 @@ class Lexer(private val source: Source) {
         "into" to Token.Kind.Keyword.INTO,
         "shear" to Token.Kind.Keyword.SHEAR,
         "from" to Token.Kind.Keyword.FROM,
+        "smith" to Token.Kind.Keyword.SMITH,
         "disenchant" to Token.Kind.Keyword.DISENCHANT,
         "by" to Token.Kind.Keyword.BY,
         "redstone" to Token.Kind.Keyword.REDSTONE,
