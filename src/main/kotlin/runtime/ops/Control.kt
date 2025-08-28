@@ -5,6 +5,7 @@ import parse.Condition
 import parse.Instr
 import parse.Operand
 import runtime.core.Machine
+import runtime.core.Value
 import runtime.registry.ItemRegistry
 
 object Control {
@@ -12,6 +13,16 @@ object Control {
         is Operand.Slot -> m.getNum(op.n)
         is Operand.Item -> ItemRegistry.idOf(op.name)?.toLong() ?: error("Unknown item: ${op.name}")
         is Operand.Number -> op.value.toLong()
+        is Operand.Harvest -> {
+            val sackVal = m.getRaw(op.sackSlot)
+            val sack = sackVal as? Value.Sack ?: error("Slot ${op.sackSlot} does not contain a sack")
+            val idx = evalIndex(m, op.index)
+            require(idx in 1..sack.items.size) {
+                "Index $idx out of bounds for sack in slot ${op.sackSlot} (size ${sack.items.size})"
+            }
+
+            sack.items[idx - 1].toLong()
+        }
     }
 
     private fun test(m: Machine, cond: Condition): Boolean {
@@ -55,5 +66,15 @@ object Control {
                 m.setNum(i.indexSlot, m.getNum(i.indexSlot) - 1)
             }
         }
+    }
+
+    private fun evalIndex(m: Machine, idxOp: Operand): Int {
+        val v = when(idxOp) {
+            is Operand.Number -> idxOp.value
+            is Operand.Slot -> m.getNum(idxOp.n)
+            else -> error("Index operand must be a number or slot")
+        }
+
+        return v.toInt()
     }
 }

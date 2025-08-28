@@ -17,8 +17,7 @@ class Execution(
         for(ins in block) {
             when(ins) {
                 is Instr.Place -> Move.handlePlace(machine, ins)
-                is Instr.SayItem -> Say.handleSayItem(machine, ins)
-                is Instr.SaySlot -> Say.handleSaySlot(machine, ins)
+                is Instr.SayExpr -> Say.handleSayExpr(machine, ins)
 
                 is Instr.CraftAdd -> Add.handleCraft(machine, ins)
                 is Instr.ShearSub -> Sub.handleShear(machine, ins)

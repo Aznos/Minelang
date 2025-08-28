@@ -97,16 +97,17 @@ class Parser(private val tokens: List<Token>) {
     private fun parseSay(): Instr {
         expectKeyword(Token.Kind.Keyword.SAY)
 
-        return if((peek().kind as? Token.Kind.Keyword) == Token.Kind.Keyword.SLOT) {
-            expectKeyword(Token.Kind.Keyword.SLOT)
-            val n = expectInt()
-            val toStr = parseOptionalToString()
-            Instr.SaySlot(n, toStr)
-        } else {
-            val item = expectIdent()
-            val toStr = parseOptionalToString()
-            Instr.SayItem(item, toStr)
+        val opStart = peek()
+        val operand = when(opStart.kind) {
+            Token.Kind.Keyword.SLOT,
+            Token.Kind.Keyword.HARVEST,
+            is Token.Kind.IntLit,
+            is Token.Kind.Ident -> parseOperand()
+            else -> errorAt(opStart, "Expected operand after 'say'")
         }
+
+        val toStr = parseOptionalToString()
+        return Instr.SayExpr(operand, toStr)
     }
 
     private fun parsePlace(): Instr {
@@ -187,15 +188,29 @@ class Parser(private val tokens: List<Token>) {
     private fun parseOperand(): Operand {
         return when(val k = peek().kind) {
             is Token.Kind.Keyword -> {
-                if(k == Token.Kind.Keyword.SLOT) {
-                    advance()
-                    Slot(expectInt())
-                } else errorAt(peek(), "Expected operand, got keyword '${k.name.lowercase()}'")
+                when(k) {
+                    Token.Kind.Keyword.SLOT -> {
+                        advance()
+                        Operand.Slot(expectInt())
+                    }
+
+                    Token.Kind.Keyword.HARVEST -> {
+                        advance()
+                        expectKeyword(Token.Kind.Keyword.SLOT)
+                        val sackSlot = expectInt()
+                        expectKeyword(Token.Kind.Keyword.AT)
+                        val idx = parseIndexOperand()
+
+                        Harvest(sackSlot, idx)
+                    }
+
+                    else -> errorAt(peek(), "Expected operand, got keyword '${k.name.lowercase()}'")
+                }
             }
 
             is Token.Kind.IntLit -> {
                 val v = (advance().kind as Token.Kind.IntLit).value
-                Operand.Number(v.toInt())
+                Number(v.toInt())
             }
 
             is Token.Kind.Ident -> {
@@ -332,6 +347,22 @@ class Parser(private val tokens: List<Token>) {
         if(rb.kind !is Token.Kind.RBRACK) errorAt(rb, "Expected ']' to end sack item list")
 
         return Instr.PlaceSack(slot, items)
+    }
+
+    private fun parseIndexOperand(): Operand {
+        return when(peek().kind) {
+            Token.Kind.Keyword.SLOT -> {
+                advance()
+                Operand.Slot(expectInt())
+            }
+
+            is Token.Kind.IntLit -> {
+                val v = (advance().kind as Token.Kind.IntLit).value
+                Operand.Number(v.toInt())
+            }
+
+            else -> errorAt(peek(), "Expected slot or integer literal")
+        }
     }
 
     private fun parseOptionalToString(): Boolean {

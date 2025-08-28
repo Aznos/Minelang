@@ -7,6 +7,7 @@ sealed interface Operand {
     data class Slot(val n: Int) : Operand
     data class Item(val name: String) : Operand
     data class Number(val value: Int) : Operand
+    data class Harvest(val sackSlot: Int, val index: Operand) : Operand
 }
 
 /**
@@ -20,22 +21,6 @@ data class Condition(val left: Operand, val cmp: Cmp, val right: Operand)
  * AST nodes representing high-level instructions
  */
 sealed interface Instr {
-    /**
-     * `say <itemName> [toString]`
-     *
-     * @property itemName The textual item name (e.g. "cobblestone")
-     * @property toString If true, interpret the value as an ASCII code and print the character
-     */
-    data class SayItem(val itemName: String, val toString: Boolean) : Instr
-
-    /**
-     * `say slot <n> [toString]`
-     *
-     * @property slot The slot number (1..36)
-     * @property toString If true, interpret the value as an ASCII code and print the character
-     */
-    data class SaySlot(val slot: Int, val toString: Boolean) : Instr
-
     /**
      * `place <itemName> in slot <n>`
      * Writes an items numerical ID to slot n (1..36)
@@ -126,6 +111,14 @@ sealed interface Instr {
      * @property items The list of items to include in the sack
      */
     data class PlaceSack(val slot: Int, val items: List<String>) : Instr
+
+    /**
+     * `say <operand> [toString]`
+     *
+     * @property operand The operand to evaluate and print
+     * @property toString If true, interpret the value as an ASCII code and print the character
+     */
+    data class SayExpr(val operand: Operand, val toString: Boolean) : Instr
 }
 
 /**

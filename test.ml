@@ -1,2 +1,2 @@
-place sack in slot 1 contains [stone, grass, dirt]
-say slot 1
+place sack in slot 1 contains [dirt, grass, cobblestone]
+say harvest slot 1 at 1
