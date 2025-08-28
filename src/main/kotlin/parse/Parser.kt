@@ -68,6 +68,7 @@ class Parser(private val tokens: List<Token>) {
         val t = peek()
         return when(t.kind) {
             Token.Kind.Keyword.SAY -> parseSay()
+            Token.Kind.Keyword.ASK -> parseAsk()
             Token.Kind.Keyword.PLACE -> {
 
                 val t1 = tokens.getOrNull(i + 1)?.kind
@@ -208,11 +209,34 @@ class Parser(private val tokens: List<Token>) {
                 Item(name)
             }
 
+            Token.Kind.LBRACK -> parseSackLiteralOperand()
             Token.Kind.EOF -> errorAt(peek(), "Expected operand, got EOF")
             Token.Kind.EOL -> errorAt(peek(), "Expected operand, got EOL")
 
             else -> errorAt(peek(), "Expected operand, got $k")
         }
+    }
+
+    private fun parseSackLiteralOperand(): SackLiteral {
+        val lb = advance()
+        if(lb.kind !is Token.Kind.LBRACK) errorAt(lb, "Expected '['")
+        val items = mutableListOf<String>()
+        consumeEols()
+
+        if(peek().kind !is Token.Kind.RBRACK) {
+            items += expectIdent()
+            consumeEols()
+            while(peek().kind is Token.Kind.COMMA) {
+                advance()
+                consumeEols()
+                items += expectIdent()
+                consumeEols()
+            }
+        }
+
+        val rb = advance()
+        if(rb.kind !is Token.Kind.RBRACK) errorAt(rb, "Expected ']'")
+        return SackLiteral(items)
     }
 
     private data class BrewOpts(
@@ -484,6 +508,17 @@ class Parser(private val tokens: List<Token>) {
         val sackSlot = expectInt()
 
         return Instr.Sneak(sackSlot)
+    }
+
+    private fun parseAsk(): Instr {
+        expectKeyword(Token.Kind.Keyword.ASK)
+        val prompt = parseOperand()
+
+        expectKeyword(Token.Kind.Keyword.IN)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val slot = expectInt()
+
+        return Instr.Ask(prompt, slot)
     }
 }
 

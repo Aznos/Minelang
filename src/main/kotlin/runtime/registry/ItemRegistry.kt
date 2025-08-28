@@ -197,6 +197,15 @@ object ItemRegistry {
         "stained_glass_black" to 182
     )
 
+    private val byId: Map<Int, String> = byName.entries.associate { (k, v) -> v to k }
+
+    fun idOfChar(c: Char): Int? {
+        val ascii = c.code
+        return if(byId.containsKey(ascii)) ascii else null
+    }
+
+    fun nameOfId(id: Int): String? = byId[id]
+
     /**
      * Looks up the numeric ID of an item by its name (case insensitive)
      *

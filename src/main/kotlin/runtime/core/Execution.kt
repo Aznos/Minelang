@@ -19,6 +19,7 @@ class Execution(
             when(ins) {
                 is Instr.Place -> Move.handlePlace(machine, ins)
                 is Instr.SayExpr -> Say.handleSayExpr(machine, ins)
+                is Instr.Ask -> Input.handleAsk(machine, ins)
 
                 is Instr.CraftAdd -> Add.handleCraft(machine, ins)
                 is Instr.ShearSub -> Sub.handleShear(machine, ins)

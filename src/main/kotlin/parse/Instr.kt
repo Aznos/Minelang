@@ -15,6 +15,8 @@ sealed interface Operand {
         val rounding: Rounding? = null,
         val scale: Int? = null
     ) : Operand
+
+    data class SackLiteral(val items: List<String>) : Operand
 }
 
 enum class BrewType { INT, RAT, FLOAT, STRING }
@@ -44,6 +46,7 @@ sealed interface Instr {
 
     data class PlaceSack(val slot: Int, val items: List<String>) : Instr
     data class SayExpr(val operand: Operand) : Instr
+    data class Ask(val prompt: Operand, val dstSlot: Int) : Instr
     data class Length(val sackSlot: Int, val dst: Int) : Instr
     data class Trade(val sackSlot: Int, val index: Operand, val itemName: String) : Instr
     data class Sprint(val sackSlot: Int, val itemName: String) : Instr

@@ -8,6 +8,7 @@ import io.Source
 class Lexer(private val source: Source) {
     private val keywords = mapOf(
         "say" to Token.Kind.Keyword.SAY,
+        "ask" to Token.Kind.Keyword.ASK,
         "place" to Token.Kind.Keyword.PLACE,
         "in" to Token.Kind.Keyword.IN,
         "to" to Token.Kind.Keyword.TO,

@@ -34,5 +34,11 @@ object Eval {
             Value.Num(sack.items[idx - 1].toLong())
         }
         is Operand.Brew -> BrewExec.evalBrew(m, op)
+        is Operand.SackLiteral -> {
+            val ids = op.items.map { name ->
+                ItemRegistry.idOf(name) ?: error("Unknown item: $name")
+            }.toIntArray()
+            Value.Sack(ids)
+        }
     }
 }

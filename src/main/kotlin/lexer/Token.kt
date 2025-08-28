@@ -14,7 +14,7 @@ data class Token(
 ) {
     sealed interface Kind {
         enum class Keyword : Kind {
-            SAY,
+            SAY, ASK,
             PLACE, IN, TO, SLOT,
             CRAFT, WITH,
             SHEAR, FROM,
