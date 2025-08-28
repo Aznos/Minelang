@@ -1,6 +1,8 @@
 package parse
 
 import lexer.Token
+import parse.Operand.*
+import kotlin.math.exp
 
 /**
  * Consumes tokens and produces a [Program]
@@ -78,6 +80,10 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.Keyword.SHEAR -> parseShear()
             Token.Kind.Keyword.SMITH -> parseSmith()
             Token.Kind.Keyword.DISENCHANT -> parseDisenchant()
+            Token.Kind.Keyword.REDSTONE -> parseRedstone()
+            Token.Kind.Keyword.MINE -> parseMine()
+            Token.Kind.Keyword.SMELT -> parseSmelt()
+            Token.Kind.Keyword.TRAVEL -> parseTravel()
             is Token.Kind.EOL -> { advance(); parseStmt() }
             is Token.Kind.EOF -> errorAt(t, "Unexpected EOF")
             else -> errorAt(t, "Unexpected token: ${t.kind}")
@@ -172,6 +178,124 @@ class Parser(private val tokens: List<Token>) {
         val c = expectInt()
 
         return Instr.DisenchantDiv(a, b, c)
+    }
+
+    private fun parseOperand(): Operand {
+        return when(val k = peek().kind) {
+            is Token.Kind.Keyword -> {
+                if(k == Token.Kind.Keyword.SLOT) {
+                    advance()
+                    Slot(expectInt())
+                } else errorAt(peek(), "Expected operand, got keyword '${k.name.lowercase()}'")
+            }
+
+            is Token.Kind.IntLit -> {
+                val v = (advance().kind as Token.Kind.IntLit).value
+                Operand.Number(v.toInt())
+            }
+
+            is Token.Kind.Ident -> {
+                val name = (advance().kind as Token.Kind.Ident).text
+                Item(name)
+            }
+
+            Token.Kind.EOF -> errorAt(peek(), "Expected operand, got EOF")
+            Token.Kind.EOL -> errorAt(peek(), "Expected operand, got EOL")
+        }
+    }
+
+    private fun parseCmp(): Cmp {
+        val t = advance()
+        val kw = t.kind as? Token.Kind.Keyword ?: errorAt(t, "Expected comparison operator, got ${t.kind}")
+        return when(kw) {
+            Token.Kind.Keyword.BEDROCK -> Cmp.BEDROCK_EQ
+            Token.Kind.Keyword.TNT -> Cmp.TNT_NE
+            else -> errorAt(t, "Expected comparison operator, got keyword '${kw.name.lowercase()}'")
+        }
+    }
+
+    private fun parseCondition(): Condition {
+        val left = parseOperand()
+        val cmp = parseCmp()
+        val right = parseOperand()
+        return Condition(left, cmp, right)
+    }
+
+    private fun parseBlock(until: Set<Token.Kind.Keyword>): List<Instr> {
+        val body = mutableListOf<Instr>()
+        consumeEols()
+
+        while(true) {
+            val k = (peek().kind as? Token.Kind.Keyword)
+            if(k != null && k in until) break
+            if(peek().kind is Token.Kind.EOF) errorAt(peek(), "Unterminated block")
+
+            body += parseStmt()
+            consumeEols()
+        }
+
+        return body
+    }
+
+    private fun parseRedstone(): Instr {
+        expectKeyword(Token.Kind.Keyword.REDSTONE)
+        val cond = parseCondition()
+        expectKeyword(Token.Kind.Keyword.THEN)
+
+        val thenBlock = parseBlock(setOf(Token.Kind.Keyword.ELSE, Token.Kind.Keyword.END))
+        val elseBlock = if((peek().kind as? Token.Kind.Keyword) == Token.Kind.Keyword.ELSE) {
+            advance()
+            val block = parseBlock(setOf(Token.Kind.Keyword.END))
+            block
+        } else null
+
+        expectKeyword(Token.Kind.Keyword.END)
+        return Instr.Redstone(cond, thenBlock, elseBlock)
+    }
+
+    private fun parseMine(): Instr {
+        expectKeyword(Token.Kind.Keyword.MINE)
+        val cond = parseCondition()
+
+        expectKeyword(Token.Kind.Keyword.DO)
+        val body = parseBlock(setOf(Token.Kind.Keyword.END))
+
+        expectKeyword(Token.Kind.Keyword.END)
+        return Instr.Mine(cond, body)
+    }
+
+    private fun parseSmelt(): Instr {
+        expectKeyword(Token.Kind.Keyword.SMELT)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val n = expectInt()
+
+        expectKeyword(Token.Kind.Keyword.TIMES)
+        expectKeyword(Token.Kind.Keyword.DO)
+
+        val body = parseBlock(setOf(Token.Kind.Keyword.END))
+        expectKeyword(Token.Kind.Keyword.END)
+
+        return Instr.Smelt(n, body)
+    }
+
+    private fun parseTravel(): Instr {
+        expectKeyword(Token.Kind.Keyword.TRAVEL)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val iSlot = expectInt()
+
+        expectKeyword(Token.Kind.Keyword.FROM)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val a = expectInt()
+
+        expectKeyword(Token.Kind.Keyword.TO)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val b = expectInt()
+
+        expectKeyword(Token.Kind.Keyword.DO)
+        val body = parseBlock(setOf(Token.Kind.Keyword.END))
+        expectKeyword(Token.Kind.Keyword.END)
+
+        return Instr.Travel(iSlot, a, b, body)
     }
 
     private fun parseOptionalToString(): Boolean {

@@ -1,6 +1,22 @@
 package parse
 
 /**
+ * Things you can compare in conditions
+ */
+sealed interface Operand {
+    data class Slot(val n: Int) : Operand
+    data class Item(val name: String) : Operand
+    data class Number(val value: Int) : Operand
+}
+
+/**
+ * Themed comparators
+ * BEDROCK = "unbreakable equality", TNT = "explodes if values differ"
+ */
+enum class Cmp { BEDROCK_EQ, TNT_NE }
+data class Condition(val left: Operand, val cmp: Cmp, val right: Operand)
+
+/**
  * AST nodes representing high-level instructions
  */
 sealed interface Instr {
@@ -68,6 +84,40 @@ sealed interface Instr {
      * @property c The destination slot number (1..36)
      */
     data class DisenchantDiv(val a: Int, val b: Int, val c: Int) : Instr
+
+    /**
+     * `redstone <cond> then <thenBlock> [else <elseBlock>] end`
+     * If condition basically
+     *
+     * @property cond The condition to evaluate
+     * @property thenBlock The block of instructions to execute if the condition is true
+     * @property elseBlock The block of instructions to execute if the condition is false (optional)
+     */
+    data class Redstone(val cond: Condition, val thenBlock: List<Instr>, val elseBlock: List<Instr>?) : Instr
+
+    /**
+     * `mind <cond> do <body> end`
+     * Mines while the condition is true
+     *
+     * @property cond The condition to evaluate before each iteration
+     * @property body The block of instructions to execute in each iteration
+     */
+    data class Mine(val cond: Condition, val body: List<Instr>) : Instr
+
+    /**
+     * `smelt slot <n> times do <body> end`
+     * Repeats body exactly value(slot n) times (does not mutate slot)
+     *
+     * @property countSlot The slot number (1..36) containing the number of iterations
+     * @property body The block of instructions to execute in each iteration
+     */
+    data class Smelt(val countSlot: Int, val body: List<Instr>) : Instr
+
+    /**
+     * `travel slot <i> from slot <a> to slot <b> do <body> end`
+     * Initializes slot i to slot a, runs body each step, increments or decrements towards b
+     */
+    data class Travel(val indexSlot: Int, val startSlot: Int, val endSlot: Int, val body: List<Instr>) : Instr
 }
 
 /**
