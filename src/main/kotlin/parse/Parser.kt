@@ -88,6 +88,8 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.Keyword.MINE -> parseMine()
             Token.Kind.Keyword.SMELT -> parseSmelt()
             Token.Kind.Keyword.TRAVEL -> parseTravel()
+            Token.Kind.Keyword.LENGTH -> parseLength()
+
             is Token.Kind.EOL -> { advance(); parseStmt() }
             is Token.Kind.EOF -> errorAt(t, "Unexpected EOF")
             else -> errorAt(t, "Unexpected token: ${t.kind}")
@@ -363,6 +365,18 @@ class Parser(private val tokens: List<Token>) {
 
             else -> errorAt(peek(), "Expected slot or integer literal")
         }
+    }
+
+    private fun parseLength(): Instr {
+        expectKeyword(Token.Kind.Keyword.LENGTH)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val sackSlot = expectInt()
+
+        expectKeyword(Token.Kind.Keyword.INTO)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val dst = expectInt()
+
+        return Instr.Length(sackSlot, dst)
     }
 
     private fun parseOptionalToString(): Boolean {

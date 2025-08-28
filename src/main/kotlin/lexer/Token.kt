@@ -27,7 +27,7 @@ data class Token(
             TRAVEL, // for-range
             BEDROCK, TNT, // == and !=
 
-            SACK, CONTAINS, HARVEST, AT // arrays
+            SACK, CONTAINS, HARVEST, AT, LENGTH // arrays
         }
 
         data class Ident(val text: String): Kind //Identifiers

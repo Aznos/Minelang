@@ -119,6 +119,14 @@ sealed interface Instr {
      * @property toString If true, interpret the value as an ASCII code and print the character
      */
     data class SayExpr(val operand: Operand, val toString: Boolean) : Instr
+
+    /**
+     * `length slot <n> into slot <n>`
+     *
+     * @property sackSlot The slot number (1..36) containing the sack
+     * @property dst The destination slot number (1..36) to store the length
+     */
+    data class Length(val sackSlot: Int, val dst: Int) : Instr
 }
 
 /**

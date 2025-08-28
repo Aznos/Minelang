@@ -30,6 +30,7 @@ class Execution(
                 is Instr.Travel -> Control.handleTravel(::runBlock, machine, ins)
 
                 is Instr.PlaceSack -> Sack.handlePlaceSack(machine, ins)
+                is Instr.Length -> Sack.handleLength(machine, ins)
             }
         }
     }
