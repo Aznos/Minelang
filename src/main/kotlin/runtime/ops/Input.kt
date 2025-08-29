@@ -8,39 +8,48 @@ import runtime.core.Value
 import runtime.registry.ItemRegistry
 
 object Input {
+    private val intPattern = Regex("^-?\\d+$")
+
     fun handleAsk(m: Machine, i: Instr.Ask) {
-        val ids: IntArray = when(val p = i.prompt) {
+        val (promptText, promptIds) = when (val p = i.prompt) {
             is Operand.Item -> {
                 val id = ItemRegistry.idOf(p.name) ?: error("Unknown item: ${p.name}")
-                intArrayOf(id)
+                "" to intArrayOf(id)
             }
 
             is Operand.Slot -> {
                 val v = m.getRaw(p.n)
-                val sack  =v as? Value.Sack ?: error("Slot ${p.n} does not contain a sack")
-                sack.items.copyOf()
+                val sack = v as? Value.Sack ?: error("Slot ${p.n} does not contain a sack")
+                val text = buildString {
+                    for(id in sack.items) append(Effects.renderAscii(id.toLong(), m.config))
+                }
+
+                text to sack.items.copyOf()
             }
 
             is Operand.SackLiteral -> {
-                val list = p.items.map { name ->
-                    ItemRegistry.idOf(name) ?: error("Unknown item: $name")
+                val ids = p.items.map { name -> ItemRegistry.idOf(name) ?: error("Unknown item: $name")
                 }.toIntArray()
-                list
+
+                val text = buildString {
+                    for(id in ids) append(Effects.renderAscii(id.toLong(), m.config))
+                }
+                text to ids
             }
 
             else -> error("Invalid prompt operand: $p")
         }
 
-        val prompt = buildString {
-            for(id in ids) {
-                append(Effects.renderAscii(id.toLong(), m.config))
-            }
-        }
-
-        m.emit(prompt)
+        m.emit(promptText)
         m.flush()
 
         val line = m.readLineOrNull() ?: error("End of input reached")
+        if (intPattern.matches(line)) {
+            val n = line.toLong()
+            m.setNum(i.dstSlot, n)
+            return
+        }
+
         val replyIds = line.map { ch ->
             ItemRegistry.idOfChar(ch) ?: error("No item for character: '$ch'")
         }.toIntArray()
