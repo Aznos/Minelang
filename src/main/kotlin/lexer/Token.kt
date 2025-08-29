@@ -45,6 +45,7 @@ data class Token(
 
         data class Ident(val text: String): Kind //Identifiers
         data class IntLit(val value: Long): Kind //Integer literals
+        data class StringLit(val text: String): Kind //String literals
 
         data object LBRACK: Kind
         data object RBRACK: Kind

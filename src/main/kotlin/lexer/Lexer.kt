@@ -75,6 +75,55 @@ class Lexer(private val source: Source) {
         "activate" to Token.Kind.Keyword.ACTIVATE,
     )
 
+    private val text = source.content
+    private var i = 0
+    private var line = 1
+    private var col = 1
+
+    private fun atEnd() = i >= text.length
+    private fun peek() = if(atEnd()) '\u0000' else text[i]
+    private fun peekNext(): Char = if(i + 1 >= text.length) '\u0000' else text[i + 1]
+    private fun advance(): Char {
+        val c = peek()
+        i++
+        if(c == '\n') {
+            line++
+            col = 1
+        } else {
+            col++
+        }
+
+        return c
+    }
+
+    private fun make(kind: Token.Kind, l: Int = line, c: Int = col) = Token(kind, l, c)
+    private fun isDigit(c: Char) = c in '0'..'9'
+    private fun isIdentStart(c: Char) = c == '_' || c.isLetter()
+    private fun isIdentPart(c: Char) = c == '_' || c.isLetterOrDigit()
+
+    private fun scanLineComment() {
+        while(!atEnd() && peek() != '\n') advance()
+    }
+
+    private fun scanNumber(startLine: Int, startCol: Int): Token {
+        val sb = StringBuilder()
+        while(isDigit(peek())) sb.append(advance())
+
+        val v = sb.toString().toLong()
+        return Token(Token.Kind.IntLit(v), startLine, startCol)
+    }
+
+    private fun scanIdentOrKeyword(startLine: Int, startCol: Int): Token {
+        val sb = StringBuilder()
+        sb.append(advance())
+        while(isIdentPart(peek())) sb.append(advance())
+
+        val word = sb.toString()
+        val kw = keywords[word.lowercase()]
+        return if(kw != null) Token(kw, startLine, startCol)
+        else Token(Token.Kind.Ident(word), startLine, startCol)
+    }
+
     /**
      * Lexes the entire source into a list of tokens
      *
@@ -82,49 +131,83 @@ class Lexer(private val source: Source) {
      */
     fun lexAll(): List<Token> {
         val out = mutableListOf<Token>()
-        source.lines().forEachIndexed { idx, rawLine ->
-            val lineNo = idx + 1
-            val line = rawLine.substringBefore("//")
-            val norm = line
-                .replace("[", " [ ")
-                .replace("]", " ] ")
-                .replace(",", " , ")
-
-            var col = 1
-            val parts = norm.split(Regex("\\s+"))
-            var pos = 0
-
-            fun advanceCol(tokenText: String) {
-                val next = line.indexOf(tokenText, pos)
-                col = if(next >= 0) next + 1 else col + tokenText.length + 1
-                pos = if(next >= 0) next + tokenText.length else pos + tokenText.length
-            }
-
-            for(part in parts) {
-                if(part.isBlank()) continue
-
-                val tok = when(part) {
-                    "[" -> Token(Token.Kind.LBRACK, lineNo, col)
-                    "]" -> Token(Token.Kind.RBRACK, lineNo, col)
-                    "," -> Token(Token.Kind.COMMA, lineNo, col)
-                    else -> {
-                        val lower = part.lowercase()
-                        when {
-                            lower in keywords -> Token(keywords.getValue(lower), lineNo, col)
-                            part.toLongOrNull() != null -> Token(Token.Kind.IntLit(part.toLong()), lineNo, col)
-                            else -> Token(Token.Kind.Ident(part), lineNo, col)
-                        }
-                    }
+        while(!atEnd()) {
+            val c = peek()
+            when {
+                c == ' ' || c == '\t' || c == '\r' -> advance()
+                c == '\n' -> {
+                    advance()
+                    out += make(Token.Kind.EOL)
                 }
 
-                out += tok
-                advanceCol(part)
-            }
+                c == '/' && peekNext() == '/' -> scanLineComment()
+                c == '"' -> {
+                    val l = line; val co = col
+                    advance()
+                    out += scanString(l, co)
+                }
 
-            out += Token(Token.Kind.EOL, lineNo, if(line.isEmpty()) 1 else line.length + 1)
+                c == '[' -> {
+                    advance()
+                    out += make(Token.Kind.LBRACK)
+                }
+
+                c == ']' -> {
+                    advance()
+                    out += make(Token.Kind.RBRACK)
+                }
+
+                c == ',' -> {
+                    advance()
+                    out += make(Token.Kind.COMMA)
+                }
+
+                isDigit(c) -> {
+                    val l = line; val co = col
+                    out += scanNumber(l, co)
+                }
+
+                isIdentStart(c) -> {
+                    val l = line; val co = col
+                    out += scanIdentOrKeyword(l, co)
+                }
+
+                else -> advance()
+            }
         }
 
-        out += Token(Token.Kind.EOF, source.lineCount, 1)
+        out += Token(Token.Kind.EOF, line, col)
         return out
+    }
+
+    private fun scanString(startLine: Int, startCol: Int): Token {
+        val sb = StringBuilder()
+        while(!atEnd()) {
+            val c = advance()
+            when(c) {
+                '"' -> return make(Token.Kind.StringLit(sb.toString()), startLine, startCol)
+                '\\' -> {
+                    if(atEnd()) break
+                    when(val e = advance()) {
+                        '\\' -> sb.append('\\')
+                        '"' -> sb.append('"')
+                        'n' -> sb.append('\n')
+                        'r' -> sb.append('\r')
+                        't' -> sb.append('\t')
+                        'x' -> {
+                            val h1 = if(!atEnd()) advance() else '\u0000'
+                            val h2 = if(!atEnd()) advance() else '\u0000'
+                            val hex = "$h1$h2"
+                            val v = hex.toIntOrNull(16) ?: error("Invalid hex escape \\x$hex at $line:$col")
+                            sb.append(v.toChar())
+                        }
+                        else -> error("Invalid escape \\$e at $line:$col")
+                    }
+                }
+                else -> sb.append(c)
+            }
+        }
+
+        error("Unterminated string starting at $startLine:$startCol")
     }
 }
