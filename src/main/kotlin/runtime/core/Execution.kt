@@ -42,6 +42,7 @@ class Execution(
                 is Instr.Bind -> Strings.handleBind(machine, ins)
                 is Instr.Loom -> Strings.handleLoom(machine, ins)
                 is Instr.Flip -> Strings.handleFlip(machine, ins)
+                is Instr.Trim -> Strings.handleTrim(machine, ins)
 
                 is Instr.Enchant -> Enchant.handleEnchant(machine, ins)
 

@@ -39,6 +39,7 @@ sealed interface Instr {
     data class Bind(val a: Int, val b: Int, val dst: Int) : Instr
     data class Loom(val sackSlot: Int, val index: Operand, val dst: Int) : Instr
     data class Flip(val sackSlot: Int, val dst: Int) : Instr
+    data class Trim(val sackSlot: Int, val dst: Int) : Instr
 
     data class Enchant(val sackSlot: Int, val upper: Boolean, val dst: Int) : Instr
 

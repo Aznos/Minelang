@@ -111,6 +111,7 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.Keyword.ACTIVATE -> parseActivate()
             Token.Kind.Keyword.FLIP -> parseFlip()
             Token.Kind.Keyword.ENCHANT -> parseEnchant()
+            Token.Kind.Keyword.TRIM -> parseTrim()
 
             is Token.Kind.EOL -> { advance(); parseStmt() }
             is Token.Kind.EOF -> errorAt(t, "Unexpected EOF")
@@ -790,6 +791,17 @@ class Parser(private val tokens: List<Token>) {
 
             else -> errorAt(peek(), "Expected 'lower' or 'upper'")
         }
+    }
+
+    private fun parseTrim(): Instr {
+        expectKeyword(Token.Kind.Keyword.TRIM)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val sackSlot = expectInt()
+        expectKeyword(Token.Kind.Keyword.IN)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val dst = expectInt()
+
+        return Instr.Trim(sackSlot, dst)
     }
 }
 

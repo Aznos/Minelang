@@ -54,4 +54,21 @@ object Strings {
 
         m.setSack(i.dst, out)
     }
+
+    fun handleTrim(m: Machine, i: Instr.Trim) {
+        val arr = m.requireSack(i.sackSlot)
+        require(arr.isNotEmpty()) { "Cannot trim from empty sack in slot ${i.sackSlot}" }
+
+        var start = 0
+        while(start < arr.size && arr[start] == 32) start++
+        var end = arr.size - 1
+        while(end >= start && arr[end] == 32) end--
+        val out = if(start > end) {
+            IntArray(0)
+        } else {
+            arr.sliceArray(start..end)
+        }
+
+        m.setSack(i.dst, out)
+    }
 }
