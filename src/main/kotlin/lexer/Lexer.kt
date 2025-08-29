@@ -61,6 +61,9 @@ class Lexer(private val source: Source) {
         "string" to Token.Kind.Keyword.STRING_T,
 
         "sleep" to Token.Kind.Keyword.SLEEP,
+        "scribe" to Token.Kind.Keyword.SCRIBE,
+        "bind" to Token.Kind.Keyword.BIND,
+        "loom" to Token.Kind.Keyword.LOOM,
     )
 
     /**

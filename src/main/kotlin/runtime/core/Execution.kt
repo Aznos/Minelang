@@ -37,6 +37,10 @@ class Execution(
                 is Instr.Sneak -> Sack.handleSneak(machine, ins)
 
                 is Instr.Sleep -> Sleep.handleSleep(machine, ins)
+                is Instr.Scribe -> Strings.handleScribe(machine, ins)
+                is Instr.Bind -> Strings.handleBind(machine, ins)
+                is Instr.Loom -> Strings.handleLoom(machine, ins)
+
                 is Instr.BrewInto -> BrewExec.handleBrewInto(machine, ins.value, ins.target, ins.dstSlot, ins.rounding, ins.scale)
             }
         }

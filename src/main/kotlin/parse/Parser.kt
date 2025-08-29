@@ -1,5 +1,6 @@
 package parse
 
+import jdk.internal.org.jline.keymap.KeyMap.key
 import lexer.Token
 import parse.Operand.*
 import java.security.Key
@@ -88,6 +89,9 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.Keyword.SNEAK -> parseSneak()
             Token.Kind.Keyword.BREW -> parseBrewInto()
             Token.Kind.Keyword.SLEEP -> parseSleep()
+            Token.Kind.Keyword.SCRIBE -> parseScribe()
+            Token.Kind.Keyword.BIND -> parseBind()
+            Token.Kind.Keyword.LOOM -> parseLoom()
 
             is Token.Kind.EOL -> { advance(); parseStmt() }
             is Token.Kind.EOF -> errorAt(t, "Unexpected EOF")
@@ -527,6 +531,44 @@ class Parser(private val tokens: List<Token>) {
         val t = advance()
         val n = (t.kind as? Token.Kind.IntLit)?.value ?: errorAt(t, "Expected integer literal")
         return Instr.Sleep(n.toInt())
+    }
+
+    private fun parseScribe(): Instr {
+        expectKeyword(Token.Kind.Keyword.SCRIBE)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val src = expectInt()
+        expectKeyword(Token.Kind.Keyword.IN)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val dst = expectInt()
+
+        return Instr.Scribe(src, dst)
+    }
+
+    private fun parseBind(): Instr {
+        expectKeyword(Token.Kind.Keyword.BIND)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val a = expectInt()
+        expectKeyword(Token.Kind.Keyword.WITH)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val b = expectInt()
+        expectKeyword(Token.Kind.Keyword.IN)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val dst = expectInt()
+
+        return Instr.Bind(a, b, dst)
+    }
+
+    private fun parseLoom(): Instr {
+        expectKeyword(Token.Kind.Keyword.LOOM)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val sack = expectInt()
+        expectKeyword(Token.Kind.Keyword.AT)
+        val idx = parseIndexOperand()
+        expectKeyword(Token.Kind.Keyword.IN)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val dst = expectInt()
+
+        return Instr.Loom(sack, idx, dst)
     }
 }
 

@@ -53,6 +53,9 @@ sealed interface Instr {
     data class Sneak(val sackSlot: Int) : Instr
 
     data class Sleep(val ticks: Int) : Instr
+    data class Scribe(val src: Int, val dst: Int) : Instr
+    data class Bind(val a: Int, val b: Int, val dst: Int) : Instr
+    data class Loom(val sackSlot: Int, val index: Operand, val dst: Int) : Instr
 
     data class BrewInto(val value: Operand, val target: BrewType, val dstSlot: Int, val rounding: Rounding? = null, val scale: Int? = null) : Instr
 }
