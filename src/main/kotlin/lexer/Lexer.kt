@@ -70,6 +70,9 @@ class Lexer(private val source: Source) {
         "value" to Token.Kind.Keyword.VALUE,
         "stash" to Token.Kind.Keyword.STASH,
         "raid" to Token.Kind.Keyword.RAID,
+
+        "command" to Token.Kind.Keyword.COMMAND,
+        "activate" to Token.Kind.Keyword.ACTIVATE,
     )
 
     /**

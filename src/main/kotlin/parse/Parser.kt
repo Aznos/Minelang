@@ -96,6 +96,8 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.Keyword.LOOM -> parseLoom()
             Token.Kind.Keyword.STASH -> parseChestStash()
             Token.Kind.Keyword.RAID -> parseChestRaid()
+            Token.Kind.Keyword.COMMAND -> parseCommand()
+            Token.Kind.Keyword.ACTIVATE -> parseActivate()
 
             is Token.Kind.EOL -> { advance(); parseStmt() }
             is Token.Kind.EOF -> errorAt(t, "Unexpected EOF")
@@ -639,6 +641,75 @@ class Parser(private val tokens: List<Token>) {
         val dst = expectInt()
 
         return Instr.ChestRaid(chestSlot, key, dst)
+    }
+
+    private fun parseBracketedOperandList(): List<Operand> {
+        val lb = advance()
+        if(lb.kind !is Token.Kind.LBRACK) errorAt(lb, "Expected '['")
+
+        val out = mutableListOf<Operand>()
+        consumeEols()
+        if(peek().kind !is Token.Kind.RBRACK) {
+            out += parseOperand()
+            consumeEols()
+            while(peek().kind is Token.Kind.COMMA) {
+                advance()
+                consumeEols()
+                out += parseOperand()
+                consumeEols()
+            }
+        }
+
+        val rb = advance()
+        if(rb.kind !is Token.Kind.RBRACK) errorAt(rb, "Expected ']'")
+        return out
+    }
+
+    private fun parseBracketedSlotList(): List<Int> {
+        val lb = advance()
+        if(lb.kind !is Token.Kind.LBRACK) errorAt(lb, "Expected '['")
+
+        val out = mutableListOf<Int>()
+        consumeEols()
+        if(peek().kind !is Token.Kind.RBRACK) {
+            expectKeyword(Token.Kind.Keyword.SLOT)
+            out += expectInt()
+            consumeEols()
+
+            while(peek().kind is Token.Kind.COMMA) {
+                advance()
+                consumeEols()
+                expectKeyword(Token.Kind.Keyword.SLOT)
+                out += expectInt()
+                consumeEols()
+            }
+        }
+
+        val rb = advance()
+        if(rb.kind !is Token.Kind.RBRACK) errorAt(rb, "Expected ']'")
+        return out
+    }
+
+    private fun parseCommand(): Instr {
+        expectKeyword(Token.Kind.Keyword.COMMAND)
+        val name = expectIdent()
+        expectKeyword(Token.Kind.Keyword.DO)
+        val body = parseBlock(setOf(Token.Kind.Keyword.END))
+        expectKeyword(Token.Kind.Keyword.END)
+
+        return Instr.Command(name, body)
+    }
+
+    private fun parseActivate(): Instr {
+        expectKeyword(Token.Kind.Keyword.ACTIVATE)
+        val name = expectIdent()
+        expectKeyword(Token.Kind.Keyword.WITH)
+        val args = parseBracketedOperandList()
+        expectKeyword(Token.Kind.Keyword.IN)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val dsts = parseBracketedSlotList()
+
+        return Instr.Activate(name, args, dsts)
     }
 }
 

@@ -61,6 +61,9 @@ sealed interface Instr {
     data class ChestStash(val chestSlot: Int, val key: Operand, val value: Operand) : Instr
     data class ChestRaid(val chestSlot: Int, val key: Operand, val dst: Int) : Instr
 
+    data class Command(val name: String, val body: List<Instr>) : Instr
+    data class Activate(val name: String, val args: List<Operand>, val dstSlots: List<Int>) : Instr
+
     data class BrewInto(val value: Operand, val target: BrewType, val dstSlot: Int, val rounding: Rounding? = null, val scale: Int? = null) : Instr
 }
 

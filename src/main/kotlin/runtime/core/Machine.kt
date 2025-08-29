@@ -1,5 +1,7 @@
 package runtime.core
 
+import parse.Instr
+
 /**
  * Holds machine state and exposes helpers for ops to use
  */
@@ -7,6 +9,7 @@ class Machine(
     val config: RuntimeConfig
 ) {
     private val slots: Array<Value?> = arrayOfNulls(config.slots + 1)
+    val commands: MutableMap<String, List<Instr>> = mutableMapOf()
 
     fun checkSlot(n: Int) {
         require(n in 1..config.slots) { "Slot $n is out of bounds (1..${config.slots})" }

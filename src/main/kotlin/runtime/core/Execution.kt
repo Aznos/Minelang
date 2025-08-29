@@ -45,6 +45,9 @@ class Execution(
                 is Instr.ChestStash -> Chests.handleStash(machine, ins)
                 is Instr.ChestRaid -> Chests.handleRaid(machine, ins)
 
+                is Instr.Command -> Functions.handleCommand(machine, ins)
+                is Instr.Activate -> Functions.handleActivate(::runBlock, machine, ins)
+
                 is Instr.BrewInto -> BrewExec.handleBrewInto(machine, ins.value, ins.target, ins.dstSlot, ins.rounding, ins.scale)
             }
         }

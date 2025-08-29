@@ -38,7 +38,9 @@ data class Token(
             SLEEP,
 
             SCRIBE, BIND, LOOM,
-            CHEST, KEY, VALUE, STASH, RAID
+            CHEST, KEY, VALUE, STASH, RAID,
+
+            COMMAND, ACTIVATE
         }
 
         data class Ident(val text: String): Kind //Identifiers
