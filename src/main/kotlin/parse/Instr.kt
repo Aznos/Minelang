@@ -15,6 +15,7 @@ data class Condition(val left: Operand, val cmp: Cmp, val right: Operand)
  */
 sealed interface Instr {
     data class Place(val itemName: String, val slot: Int) : Instr
+    data class PlaceString(val text: String, val slot: Int) : Instr
     data class CraftAdd(val a: Int, val b: Int, val c: Int) : Instr
     data class ShearSub(val a: Int, val b: Int, val c: Int) : Instr
     data class SmithMul(val a: Int, val b: Int, val c: Int) : Instr

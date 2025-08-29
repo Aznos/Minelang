@@ -14,4 +14,5 @@ sealed interface Operand {
     ) : Operand
 
     data class SackLiteral(val items: List<String>) : Operand
+    data class StringLit(val text: String) : Operand
 }

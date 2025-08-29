@@ -1,6 +1,12 @@
-place cobblestone in slot 1
-place cobblestone in slot 2
+say brew "hello world" as string
+say brew flowing_lava as string
 
-redstone slot 1 bedrock slot 2 then
-    say bedrock
-end
+place "ab" in slot 2
+brew slot 2 as int in slot 3
+say slot 3
+
+say brew flowing_lava as string
+
+ask "Enter name: " in slot 4
+say brew "Hi, " as string
+say brew slot 4 as string

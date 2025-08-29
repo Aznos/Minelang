@@ -1,6 +1,7 @@
 package runtime.core
 
 import parse.Instr
+import runtime.registry.ItemRegistry
 
 /**
  * Holds machine state and exposes helpers for ops to use

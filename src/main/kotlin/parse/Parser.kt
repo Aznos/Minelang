@@ -80,7 +80,9 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.Keyword.SAY -> parseSay()
             Token.Kind.Keyword.ASK -> parseAsk()
             Token.Kind.Keyword.PLACE -> {
-                when(tokens.getOrNull(i + 1)?.kind) {
+                val k1 = tokens.getOrNull(i + 1)?.kind
+                when(k1) {
+                    is Token.Kind.StringLit -> parsePlaceString()
                     Token.Kind.Keyword.SACK -> parsePlaceSack()
                     Token.Kind.Keyword.CHEST -> parsePlaceChest()
                     else -> parsePlace()
@@ -118,6 +120,17 @@ class Parser(private val tokens: List<Token>) {
         expectKeyword(Token.Kind.Keyword.SAY)
         val operand = parseOperand()
         return Instr.SayExpr(operand)
+    }
+
+    private fun parsePlaceString(): Instr {
+        expectKeyword(Token.Kind.Keyword.PLACE)
+        val sTok = advance()
+        val s = (sTok.kind as? Token.Kind.StringLit)?.text ?: errorAt(sTok, "Expected string literal")
+        expectKeyword(Token.Kind.Keyword.IN)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val n = expectInt()
+
+        return Instr.PlaceString(s, n)
     }
 
     private fun parsePlace(): Instr {
@@ -227,6 +240,11 @@ class Parser(private val tokens: List<Token>) {
 
                     else -> errorAt(peek(), "Expected operand, got keyword '${k.name.lowercase()}'")
                 }
+            }
+
+            is Token.Kind.StringLit -> {
+                val s = (advance().kind as Token.Kind.StringLit).text
+                StringLit(s)
             }
 
             is Token.Kind.IntLit -> {

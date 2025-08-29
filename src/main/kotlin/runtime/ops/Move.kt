@@ -9,4 +9,12 @@ object Move {
         val id = ItemRegistry.idOf(p.itemName) ?: error("Unknown item: ${p.itemName}")
         m.setNum(p.slot, id.toLong())
     }
+
+    fun handlePlaceString(m: Machine, i: Instr.PlaceString) {
+        val codes = i.text.map { ch ->
+            ItemRegistry.idOfChar(ch) ?: error("Unknown char: $ch")
+        }.toIntArray()
+
+        m.setSack(i.slot, codes)
+    }
 }

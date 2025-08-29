@@ -57,7 +57,11 @@ object BrewExec {
         is Value.Rat -> v.num.toDouble() / v.den.toDouble()
         is Value.FloatStr -> v.text.toDoubleOrNull() ?: 0.0
         is Value.CharCode -> v.code.toDouble()
-        is Value.Sack -> 0.0
+        is Value.Sack -> {
+            var sum = 0L
+            for(id in v.items) sum += id.toLong()
+            sum.toDouble()
+        }
         is Value.Chest -> 0.0
     }
 

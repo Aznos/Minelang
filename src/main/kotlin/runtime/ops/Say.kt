@@ -40,5 +40,12 @@ object Eval {
             }.toIntArray()
             Value.Sack(ids)
         }
+        is Operand.StringLit -> {
+            val ids = op.text.map { ch ->
+                ItemRegistry.idOfChar(ch) ?: error("No item for character: '$ch'")
+            }.toIntArray()
+
+            Value.Sack(ids)
+        }
     }
 }

@@ -17,6 +17,7 @@ class Execution(
         for(ins in block) {
             when(ins) {
                 is Instr.Place -> Move.handlePlace(machine, ins)
+                is Instr.PlaceString -> Move.handlePlaceString(machine, ins)
                 is Instr.SayExpr -> Say.handleSayExpr(machine, ins)
                 is Instr.Ask -> Input.handleAsk(machine, ins)
 
