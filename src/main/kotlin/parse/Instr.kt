@@ -52,6 +52,8 @@ sealed interface Instr {
     data class Sprint(val sackSlot: Int, val itemName: String) : Instr
     data class Sneak(val sackSlot: Int) : Instr
 
+    data class Sleep(val ticks: Int) : Instr
+
     data class BrewInto(val value: Operand, val target: BrewType, val dstSlot: Int, val rounding: Rounding? = null, val scale: Int? = null) : Instr
 }
 

@@ -58,7 +58,11 @@ class Machine(
         }
     }
 
-    fun emit(s: String) = config.out(s)
+    fun emit(s: String) {
+        config.out(s)
+        System.out.flush()
+    }
+
     fun emitValue(v: Value) {
         when(v) {
             is Value.Num -> emit(v.v.toString())
@@ -67,6 +71,8 @@ class Machine(
             is Value.CharCode -> emit(Effects.renderAscii(v.code, config))
             is Value.Sack -> emit(v.items.joinToString(","))
         }
+
+        System.out.flush()
     }
 
     fun readLineOrNull(): String? = config.inReader.readLine()

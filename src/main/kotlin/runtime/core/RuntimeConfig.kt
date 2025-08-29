@@ -11,5 +11,6 @@ data class RuntimeConfig(
     val out: (String) -> Unit = { print(it) },
     val asciiNulAsSpace: Boolean = true,
     val asciiCrLfAsNewLine: Boolean = true,
-    val inReader: BufferedReader = BufferedReader(InputStreamReader(System.`in`))
+    val inReader: BufferedReader = BufferedReader(InputStreamReader(System.`in`)),
+    val sleepFn: (Long) -> Unit = { Thread.sleep(it) }
 )

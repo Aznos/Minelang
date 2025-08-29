@@ -35,6 +35,8 @@ data class Token(
             CAULDRON, SCALE,
 
             INT_T, RAT_T, FLOAT_T, STRING_T,
+
+            SLEEP
         }
 
         data class Ident(val text: String): Kind //Identifiers

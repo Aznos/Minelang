@@ -87,6 +87,7 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.Keyword.SPRINT -> parseSprint()
             Token.Kind.Keyword.SNEAK -> parseSneak()
             Token.Kind.Keyword.BREW -> parseBrewInto()
+            Token.Kind.Keyword.SLEEP -> parseSleep()
 
             is Token.Kind.EOL -> { advance(); parseStmt() }
             is Token.Kind.EOF -> errorAt(t, "Unexpected EOF")
@@ -519,6 +520,13 @@ class Parser(private val tokens: List<Token>) {
         val slot = expectInt()
 
         return Instr.Ask(prompt, slot)
+    }
+
+    private fun parseSleep(): Instr {
+        expectKeyword(Token.Kind.Keyword.SLEEP)
+        val t = advance()
+        val n = (t.kind as? Token.Kind.IntLit)?.value ?: errorAt(t, "Expected integer literal")
+        return Instr.Sleep(n.toInt())
     }
 }
 

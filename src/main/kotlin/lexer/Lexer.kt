@@ -58,7 +58,9 @@ class Lexer(private val source: Source) {
         "int" to Token.Kind.Keyword.INT_T,
         "rat" to Token.Kind.Keyword.RAT_T,
         "float" to Token.Kind.Keyword.FLOAT_T,
-        "string" to Token.Kind.Keyword.STRING_T
+        "string" to Token.Kind.Keyword.STRING_T,
+
+        "sleep" to Token.Kind.Keyword.SLEEP,
     )
 
     /**

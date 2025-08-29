@@ -1,7 +1,6 @@
 package runtime.core
 
 import parse.Instr
-import parse.Operand
 import parse.Program
 import runtime.ops.*
 
@@ -37,6 +36,7 @@ class Execution(
                 is Instr.Sprint -> Sack.handleSprint(machine, ins)
                 is Instr.Sneak -> Sack.handleSneak(machine, ins)
 
+                is Instr.Sleep -> Sleep.handleSleep(machine, ins)
                 is Instr.BrewInto -> BrewExec.handleBrewInto(machine, ins.value, ins.target, ins.dstSlot, ins.rounding, ins.scale)
             }
         }
