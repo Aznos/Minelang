@@ -46,3 +46,12 @@ tasks.named<JavaExec>("run") {
 kotlin {
     jvmToolchain(21)
 }
+
+kotlin
+tasks.jar {
+    manifest {
+        attributes(
+            "Main-Class" to "MainKt"
+        )
+    }
+}

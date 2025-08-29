@@ -3,6 +3,7 @@ package runtime.ops
 import parse.BrewType
 import parse.Operand
 import parse.Rounding
+import runtime.core.Effects
 import runtime.core.Machine
 import runtime.core.Value
 import kotlin.math.ceil
@@ -22,17 +23,21 @@ object BrewExec {
                 val d = toDouble(base)
                 Value.FloatStr(formatWithScale(d, sc, b.rounding ?: Rounding.ROUND))
             }
-            BrewType.STRING -> {
-                val code = when(base) {
-                    is Value.Num -> base.v
-                    is Value.Rat -> floor(toDouble(base)).toLong()
-                    is Value.FloatStr -> base.text.toDoubleOrNull()?.toLong() ?: 0L
-                    is Value.CharCode -> base.code
-                    is Value.Sack -> 0L
-                }
-                Value.CharCode(code)
+            BrewType.STRING -> asStringValue(m, base)
+        }
+    }
+
+    private fun asStringValue(m: Machine, v: Value): Value {
+        val text = when (v) {
+            is Value.Num -> Effects.renderAscii(v.v, m.config)
+            is Value.Rat -> "${v.num}/${v.den}"
+            is Value.FloatStr -> v.text
+            is Value.CharCode -> Effects.renderAscii(v.code, m.config)
+            is Value.Sack -> buildString {
+                for(id in v.items) append(Effects.renderAscii(id.toLong(), m.config))
             }
         }
+        return Value.FloatStr(text)
     }
 
     fun handleBrewInto(m: Machine, value: Operand, target: BrewType, dst: Int, rounding: Rounding?, scale: Int?) {
