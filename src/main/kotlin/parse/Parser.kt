@@ -1,11 +1,7 @@
 package parse
 
-import jdk.internal.org.jline.keymap.KeyMap.key
 import lexer.Token
 import parse.Operand.*
-import java.security.Key
-import kotlin.math.exp
-import kotlin.math.round
 
 /**
  * Consumes tokens and produces a [Program]
@@ -45,6 +41,19 @@ class Parser(private val tokens: List<Token>) {
         if(n !in 1..36) errorAt(t, "Slot index out of range: $n (must be 1-36)")
 
         return n.toInt()
+    }
+
+    private fun expectItemName(): String {
+        val t = advance()
+        return when(val k = t.kind) {
+            is Token.Kind.Ident -> k.text
+            is Token.Kind.Keyword -> when(k) {
+                Token.Kind.Keyword.BEDROCK -> "bedrock"
+                Token.Kind.Keyword.TNT -> "tnt"
+                else -> errorAt(t, "Expected identifier")
+            }
+            else -> errorAt(t, "Expected identifier")
+        }
     }
 
     private fun errorAt(t: Token, msg: String): Nothing {
@@ -113,7 +122,7 @@ class Parser(private val tokens: List<Token>) {
 
     private fun parsePlace(): Instr {
         expectKeyword(Token.Kind.Keyword.PLACE)
-        val item = expectIdent()
+        val item = expectItemName()
 
         expectKeyword(Token.Kind.Keyword.IN)
         expectKeyword(Token.Kind.Keyword.SLOT)
@@ -206,6 +215,16 @@ class Parser(private val tokens: List<Token>) {
                     }
 
                     Token.Kind.Keyword.BREW -> parseBrewOperand()
+                    Token.Kind.Keyword.BEDROCK -> {
+                        advance()
+                        Item("bedrock")
+                    }
+
+                    Token.Kind.Keyword.TNT -> {
+                        advance()
+                        Item("tnt")
+                    }
+
                     else -> errorAt(peek(), "Expected operand, got keyword '${k.name.lowercase()}'")
                 }
             }
@@ -235,12 +254,12 @@ class Parser(private val tokens: List<Token>) {
         consumeEols()
 
         if(peek().kind !is Token.Kind.RBRACK) {
-            items += expectIdent()
+            items += expectItemName()
             consumeEols()
             while(peek().kind is Token.Kind.COMMA) {
                 advance()
                 consumeEols()
-                items += expectIdent()
+                items += expectItemName()
                 consumeEols()
             }
         }
@@ -444,12 +463,12 @@ class Parser(private val tokens: List<Token>) {
         val items = mutableListOf<String>()
         consumeEols()
         if(peek().kind !is Token.Kind.RBRACK) {
-            items += expectIdent()
+            items += expectItemName()
             consumeEols()
             while(peek().kind is Token.Kind.COMMA) {
                 advance()
                 consumeEols()
-                items += expectIdent()
+                items += expectItemName()
                 consumeEols()
             }
         }
@@ -497,7 +516,7 @@ class Parser(private val tokens: List<Token>) {
         val idx = parseIndexOperand()
 
         expectKeyword(Token.Kind.Keyword.TO)
-        val item = expectIdent()
+        val item = expectItemName()
 
         return Instr.Trade(sackSlot, idx, item)
     }
@@ -508,7 +527,7 @@ class Parser(private val tokens: List<Token>) {
         val sackSlot = expectInt()
 
         expectKeyword(Token.Kind.Keyword.WITH)
-        val item = expectIdent()
+        val item = expectItemName()
 
         return Instr.Sprint(sackSlot, item)
     }
