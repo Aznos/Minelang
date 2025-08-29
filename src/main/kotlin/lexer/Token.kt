@@ -38,6 +38,7 @@ data class Token(
             SLEEP,
 
             SCRIBE, BIND, LOOM, FLIP,
+            ENCHANT, LOWER, UPPER,
             CHEST, KEY, VALUE, STASH, RAID,
 
             COMMAND, ACTIVATE

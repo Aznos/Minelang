@@ -43,6 +43,8 @@ class Execution(
                 is Instr.Loom -> Strings.handleLoom(machine, ins)
                 is Instr.Flip -> Strings.handleFlip(machine, ins)
 
+                is Instr.Enchant -> Enchant.handleEnchant(machine, ins)
+
                 is Instr.PlaceChest -> Chests.handlePlaceChest(machine, ins)
                 is Instr.ChestStash -> Chests.handleStash(machine, ins)
                 is Instr.ChestRaid -> Chests.handleRaid(machine, ins)

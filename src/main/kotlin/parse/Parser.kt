@@ -110,6 +110,7 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.Keyword.COMMAND -> parseCommand()
             Token.Kind.Keyword.ACTIVATE -> parseActivate()
             Token.Kind.Keyword.FLIP -> parseFlip()
+            Token.Kind.Keyword.ENCHANT -> parseEnchant()
 
             is Token.Kind.EOL -> { advance(); parseStmt() }
             is Token.Kind.EOF -> errorAt(t, "Unexpected EOF")
@@ -759,6 +760,36 @@ class Parser(private val tokens: List<Token>) {
         val dst = expectInt()
 
         return Instr.Flip(sackSlot, dst)
+    }
+
+    private fun parseEnchant(): Instr {
+        expectKeyword(Token.Kind.Keyword.ENCHANT)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val itemSlot = expectInt()
+        expectKeyword(Token.Kind.Keyword.TO)
+
+        val k = (peek().kind as? Token.Kind.Keyword) ?: errorAt(peek(), "Expected 'lower' or 'upper'")
+        return when (k) {
+            Token.Kind.Keyword.LOWER -> {
+                advance()
+                expectKeyword(Token.Kind.Keyword.IN)
+                expectKeyword(Token.Kind.Keyword.SLOT)
+                val dst = expectInt()
+
+                Instr.Enchant(itemSlot, upper = false, dst = dst)
+            }
+
+            Token.Kind.Keyword.UPPER -> {
+                advance()
+                expectKeyword(Token.Kind.Keyword.IN)
+                expectKeyword(Token.Kind.Keyword.SLOT)
+                val dst = expectInt()
+
+                Instr.Enchant(itemSlot, upper = true, dst = dst)
+            }
+
+            else -> errorAt(peek(), "Expected 'lower' or 'upper'")
+        }
     }
 }
 

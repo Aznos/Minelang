@@ -40,6 +40,8 @@ sealed interface Instr {
     data class Loom(val sackSlot: Int, val index: Operand, val dst: Int) : Instr
     data class Flip(val sackSlot: Int, val dst: Int) : Instr
 
+    data class Enchant(val sackSlot: Int, val upper: Boolean, val dst: Int) : Instr
+
     data class PlaceChest(val slot: Int, val entries: List<Pair<String, String>>) : Instr
     data class ChestStash(val chestSlot: Int, val key: Operand, val value: Operand) : Instr
     data class ChestRaid(val chestSlot: Int, val key: Operand, val dst: Int) : Instr
