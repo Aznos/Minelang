@@ -38,6 +38,7 @@ sealed interface Instr {
     data class Scribe(val src: Int, val dst: Int) : Instr
     data class Bind(val a: Int, val b: Int, val dst: Int) : Instr
     data class Loom(val sackSlot: Int, val index: Operand, val dst: Int) : Instr
+    data class Flip(val sackSlot: Int, val dst: Int) : Instr
 
     data class PlaceChest(val slot: Int, val entries: List<Pair<String, String>>) : Instr
     data class ChestStash(val chestSlot: Int, val key: Operand, val value: Operand) : Instr

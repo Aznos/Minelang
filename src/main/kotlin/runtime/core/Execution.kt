@@ -41,6 +41,7 @@ class Execution(
                 is Instr.Scribe -> Strings.handleScribe(machine, ins)
                 is Instr.Bind -> Strings.handleBind(machine, ins)
                 is Instr.Loom -> Strings.handleLoom(machine, ins)
+                is Instr.Flip -> Strings.handleFlip(machine, ins)
 
                 is Instr.PlaceChest -> Chests.handlePlaceChest(machine, ins)
                 is Instr.ChestStash -> Chests.handleStash(machine, ins)

@@ -109,6 +109,7 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.Keyword.RAID -> parseChestRaid()
             Token.Kind.Keyword.COMMAND -> parseCommand()
             Token.Kind.Keyword.ACTIVATE -> parseActivate()
+            Token.Kind.Keyword.FLIP -> parseFlip()
 
             is Token.Kind.EOL -> { advance(); parseStmt() }
             is Token.Kind.EOF -> errorAt(t, "Unexpected EOF")
@@ -747,6 +748,17 @@ class Parser(private val tokens: List<Token>) {
         val dsts = parseBracketedSlotList()
 
         return Instr.Activate(name, args, dsts)
+    }
+
+    private fun parseFlip(): Instr {
+        expectKeyword(Token.Kind.Keyword.FLIP)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val sackSlot = expectInt()
+        expectKeyword(Token.Kind.Keyword.IN)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val dst = expectInt()
+
+        return Instr.Flip(sackSlot, dst)
     }
 }
 

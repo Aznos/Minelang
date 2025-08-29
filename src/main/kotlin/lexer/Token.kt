@@ -37,7 +37,7 @@ data class Token(
             INT_T, RAT_T, FLOAT_T, STRING_T,
             SLEEP,
 
-            SCRIBE, BIND, LOOM,
+            SCRIBE, BIND, LOOM, FLIP,
             CHEST, KEY, VALUE, STASH, RAID,
 
             COMMAND, ACTIVATE

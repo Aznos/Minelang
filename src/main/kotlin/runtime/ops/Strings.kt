@@ -42,4 +42,16 @@ object Strings {
         require(idx in 1..arr.size) { "Index $idx out of bounds for sack of size ${arr.size}" }
         m.setSack(i.dst, intArrayOf(arr[idx - 1]))
     }
+
+    fun handleFlip(m: Machine, i: Instr.Flip) {
+        val arr = m.requireSack(i.sackSlot)
+        require(arr.isNotEmpty()) { "Cannot flip from empty sack in slot ${i.sackSlot}" }
+
+        val out = IntArray(arr.size)
+        for(j in arr.indices) {
+            out[j] = arr[arr.size - 1 - j]
+        }
+
+        m.setSack(i.dst, out)
+    }
 }
