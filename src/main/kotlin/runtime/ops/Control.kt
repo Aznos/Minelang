@@ -39,6 +39,7 @@ object Control {
         is Value.FloatStr -> v.text.toDoubleOrNull() ?: Double.NaN
         is Value.CharCode -> v.code.toDouble()
         is Value.Sack -> Double.NaN
+        is Value.Chest -> Double.NaN
     }
 
     private fun equalWithEpsilon(a: Double, b: Double, eps: Double = 1e-9): Boolean {

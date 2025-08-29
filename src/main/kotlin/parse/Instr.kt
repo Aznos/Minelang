@@ -57,6 +57,10 @@ sealed interface Instr {
     data class Bind(val a: Int, val b: Int, val dst: Int) : Instr
     data class Loom(val sackSlot: Int, val index: Operand, val dst: Int) : Instr
 
+    data class PlaceChest(val slot: Int, val entries: List<Pair<String, String>>) : Instr
+    data class ChestStash(val chestSlot: Int, val key: Operand, val value: Operand) : Instr
+    data class ChestRaid(val chestSlot: Int, val key: Operand, val dst: Int) : Instr
+
     data class BrewInto(val value: Operand, val target: BrewType, val dstSlot: Int, val rounding: Rounding? = null, val scale: Int? = null) : Instr
 }
 

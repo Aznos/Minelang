@@ -41,6 +41,10 @@ class Execution(
                 is Instr.Bind -> Strings.handleBind(machine, ins)
                 is Instr.Loom -> Strings.handleLoom(machine, ins)
 
+                is Instr.PlaceChest -> Chests.handlePlaceChest(machine, ins)
+                is Instr.ChestStash -> Chests.handleStash(machine, ins)
+                is Instr.ChestRaid -> Chests.handleRaid(machine, ins)
+
                 is Instr.BrewInto -> BrewExec.handleBrewInto(machine, ins.value, ins.target, ins.dstSlot, ins.rounding, ins.scale)
             }
         }

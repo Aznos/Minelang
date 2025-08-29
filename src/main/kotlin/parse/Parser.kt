@@ -71,9 +71,11 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.Keyword.SAY -> parseSay()
             Token.Kind.Keyword.ASK -> parseAsk()
             Token.Kind.Keyword.PLACE -> {
-
-                val t1 = tokens.getOrNull(i + 1)?.kind
-                if(t1 == Token.Kind.Keyword.SACK) parsePlaceSack() else parsePlace()
+                when(tokens.getOrNull(i + 1)?.kind) {
+                    Token.Kind.Keyword.SACK -> parsePlaceSack()
+                    Token.Kind.Keyword.CHEST -> parsePlaceChest()
+                    else -> parsePlace()
+                }
             }
             Token.Kind.Keyword.CRAFT -> parseCraft()
             Token.Kind.Keyword.SHEAR -> parseShear()
@@ -92,6 +94,8 @@ class Parser(private val tokens: List<Token>) {
             Token.Kind.Keyword.SCRIBE -> parseScribe()
             Token.Kind.Keyword.BIND -> parseBind()
             Token.Kind.Keyword.LOOM -> parseLoom()
+            Token.Kind.Keyword.STASH -> parseChestStash()
+            Token.Kind.Keyword.RAID -> parseChestRaid()
 
             is Token.Kind.EOL -> { advance(); parseStmt() }
             is Token.Kind.EOF -> errorAt(t, "Unexpected EOF")
@@ -569,6 +573,72 @@ class Parser(private val tokens: List<Token>) {
         val dst = expectInt()
 
         return Instr.Loom(sack, idx, dst)
+    }
+
+    private fun parsePlaceChest(): Instr {
+        expectKeyword(Token.Kind.Keyword.PLACE)
+        expectKeyword(Token.Kind.Keyword.CHEST)
+        expectKeyword(Token.Kind.Keyword.IN)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val slot = expectInt()
+
+        val entries = mutableListOf<Pair<String, String>>()
+        if((peek().kind as? Token.Kind.Keyword) == Token.Kind.Keyword.CONTAINS) {
+            advance()
+            val lb = advance()
+            if(lb.kind !is Token.Kind.LBRACK) errorAt(lb, "Expected '[' to start chest item list")
+
+            consumeEols()
+            if(peek().kind !is Token.Kind.RBRACK) {
+                entries += parseChestEntry()
+                consumeEols()
+                while(peek().kind is Token.Kind.COMMA) {
+                    advance()
+                    consumeEols()
+                    entries += parseChestEntry()
+                    consumeEols()
+                }
+            }
+
+            val rb = advance()
+            if(rb.kind !is Token.Kind.RBRACK) errorAt(rb, "Expected ']' to end chest item list")
+        }
+
+        return Instr.PlaceChest(slot, entries)
+    }
+
+    private fun parseChestEntry(): Pair<String, String> {
+        expectKeyword(Token.Kind.Keyword.KEY)
+        val k = expectIdent()
+        expectKeyword(Token.Kind.Keyword.VALUE)
+        val v = expectIdent()
+
+        return k to v
+    }
+
+    private fun parseChestStash(): Instr {
+        expectKeyword(Token.Kind.Keyword.STASH)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val chestSlot = expectInt()
+        expectKeyword(Token.Kind.Keyword.KEY)
+        val key = parseOperand()
+        expectKeyword(Token.Kind.Keyword.VALUE)
+        val value = parseOperand()
+
+        return Instr.ChestStash(chestSlot, key, value)
+    }
+
+    private fun parseChestRaid(): Instr {
+        expectKeyword(Token.Kind.Keyword.RAID)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val chestSlot = expectInt()
+        expectKeyword(Token.Kind.Keyword.KEY)
+        val key = parseOperand()
+        expectKeyword(Token.Kind.Keyword.IN)
+        expectKeyword(Token.Kind.Keyword.SLOT)
+        val dst = expectInt()
+
+        return Instr.ChestRaid(chestSlot, key, dst)
     }
 }
 

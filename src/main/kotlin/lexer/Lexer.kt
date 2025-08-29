@@ -64,6 +64,12 @@ class Lexer(private val source: Source) {
         "scribe" to Token.Kind.Keyword.SCRIBE,
         "bind" to Token.Kind.Keyword.BIND,
         "loom" to Token.Kind.Keyword.LOOM,
+
+        "chest" to Token.Kind.Keyword.CHEST,
+        "key" to Token.Kind.Keyword.KEY,
+        "value" to Token.Kind.Keyword.VALUE,
+        "stash" to Token.Kind.Keyword.STASH,
+        "raid" to Token.Kind.Keyword.RAID,
     )
 
     /**

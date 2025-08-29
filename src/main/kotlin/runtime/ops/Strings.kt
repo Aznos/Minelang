@@ -11,6 +11,7 @@ object Strings {
         val v = m.getRaw(i.src)
         val copy = when(v) {
             is Value.Sack -> Value.Sack(v.items.copyOf())
+            is Value.Chest -> Value.Chest(v.map.toMutableMap())
             is Value.Rat -> Value.Rat(v.num, v.den)
             is Value.Num -> Value.Num(v.v)
             is Value.FloatStr -> Value.FloatStr(v.text)

@@ -28,13 +28,20 @@ object BrewExec {
     }
 
     private fun asStringValue(m: Machine, v: Value): Value {
-        val text = when (v) {
+        val text = when(v) {
             is Value.Num -> Effects.renderAscii(v.v, m.config)
             is Value.Rat -> "${v.num}/${v.den}"
             is Value.FloatStr -> v.text
             is Value.CharCode -> Effects.renderAscii(v.code, m.config)
             is Value.Sack -> buildString {
                 for(id in v.items) append(Effects.renderAscii(id.toLong(), m.config))
+            }
+            is Value.Chest -> buildString {
+                for((k, v) in v.map) {
+                    append(Effects.renderAscii(k.toLong(), m.config))
+                    append('=')
+                    append(Effects.renderAscii(v.toLong(), m.config))
+                }
             }
         }
         return Value.FloatStr(text)
@@ -51,6 +58,7 @@ object BrewExec {
         is Value.FloatStr -> v.text.toDoubleOrNull() ?: 0.0
         is Value.CharCode -> v.code.toDouble()
         is Value.Sack -> 0.0
+        is Value.Chest -> 0.0
     }
 
     private fun asRat(v: Value): Value.Rat = when(v) {
@@ -62,6 +70,7 @@ object BrewExec {
         }
         is Value.CharCode -> Value.Rat(v.code, 1)
         is Value.Sack -> Value.Rat(0, 1)
+        is Value.Chest -> Value.Rat(0, 1)
     }
 
     private fun applyRounding(d: Double, rule: Rounding): Double = when(rule) {

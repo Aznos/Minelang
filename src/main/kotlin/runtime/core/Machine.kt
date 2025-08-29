@@ -55,6 +55,7 @@ class Machine(
             is Value.FloatStr -> throw RuntimeException("Slot $n contains a non-integer float string '${v.text}'")
             is Value.CharCode -> v.code
             is Value.Sack -> throw RuntimeException("Slot $n contains a sack, not a number")
+            is Value.Chest -> throw RuntimeException("Slot $n contains a chest, not a number")
         }
     }
 
@@ -70,6 +71,7 @@ class Machine(
             is Value.FloatStr -> emit(v.text)
             is Value.CharCode -> emit(Effects.renderAscii(v.code, config))
             is Value.Sack -> emit(v.items.joinToString(","))
+            is Value.Chest -> emit(v.map.entries.joinToString(",") { "${it.key}:${it.value}" })
         }
 
         System.out.flush()
